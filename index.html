@@ -1,0 +1,3691 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Read and listen to the Holy Quran with translations">
+    <title>Al Quran - Read & Listen</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Amiri:wght@400;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css">
+    <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css">
+    <style>
+        :root {
+            --primary: #0d9488;
+            --primary-light: #14b8a6;
+            --primary-dark: #0f766e;
+            --accent: #f59e0b;
+            --accent-light: #fbbf24;
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --surface-hover: #f1f5f9;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --radius: 16px;
+            --radius-sm: 8px;
+        }
+
+        .dark-mode {
+            --primary: #2dd4bf;
+            --primary-light: #5eead4;
+            --primary-dark: #14b8a6;
+            --accent: #fbbf24;
+            --accent-light: #fcd34d;
+            --bg: #0f172a;
+            --surface: #1e293b;
+            --surface-hover: #334155;
+            --text: #f1f5f9;
+            --text-muted: #94a3b8;
+            --border: #334155;
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.4);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            transition: all 0.3s ease;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        /* Navbar */
+        .navbar {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 0.75rem 1rem;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-link {
+            font-weight: 500;
+            padding: 0.5rem 1rem !important;
+            border-radius: var(--radius-sm);
+            transition: all 0.2s;
+        }
+
+        .nav-link:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background: var(--surface);
+            height: calc(100vh - 60px);
+            position: sticky;
+            top: 60px;
+            overflow: hidden;
+            /* Changed from auto to hidden to manage flex scroll */
+            border-right: 1px solid var(--border);
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #surahList {
+            overflow-y: auto;
+            flex-grow: 1;
+            /* Takes remaining height */
+        }
+
+        .sidebar-footer {
+            background: var(--surface) !important;
+            /* Override bg-light */
+            border-top: 1px solid var(--border) !important;
+        }
+
+        .sidebar-title {
+            padding: 1.25rem;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            font-weight: 600;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .surah-list-item {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .surah-list-item:hover {
+            background: var(--surface-hover);
+            padding-left: 1.5rem;
+        }
+
+        .surah-list-item.active {
+            background: linear-gradient(90deg, var(--primary) 0%, transparent 100%);
+            background-size: 4px 100%;
+            background-repeat: no-repeat;
+            background-color: rgba(13, 148, 136, 0.08);
+        }
+
+        /* Arabic Text */
+        .arabic-text {
+            font-family: 'Amiri', 'Traditional Arabic', serif;
+            font-size: 2rem;
+            line-height: 2.8;
+            text-align: right;
+            direction: rtl;
+            color: var(--text);
+        }
+
+        .translation-text {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+        }
+
+        .transliteration-text {
+            font-size: 1rem;
+            line-height: 1.7;
+            color: var(--accent);
+            font-style: italic;
+            margin-top: 0.5rem;
+        }
+
+        /* Ayah Cards */
+        .ayah-container {
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+        .ayah-container:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .ayah-container.active {
+            border-left: 4px solid var(--accent);
+            background: linear-gradient(90deg, rgba(245, 158, 11, 0.05), transparent);
+        }
+
+        .ayah-number {
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%);
+            color: white;
+            border-radius: 50%;
+            width: 38px;
+            height: 38px;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: 600;
+            font-size: 0.9rem;
+            box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+        }
+
+        /* Audio Player */
+        .audio-player {
+            background: var(--surface);
+            backdrop-filter: blur(20px);
+            border-radius: var(--radius);
+            padding: 1.25rem;
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 92%;
+            max-width: 600px;
+            z-index: 1000;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border);
+        }
+
+        .player-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            /* Allow wrapping on small screens */
+        }
+
+        .player-btn {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(13, 148, 136, 0.3);
+        }
+
+        .player-btn:hover {
+            transform: scale(1.08);
+            box-shadow: 0 4px 12px rgba(13, 148, 136, 0.4);
+        }
+
+        .player-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Surah Info Banner */
+        .surah-info {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            border-radius: var(--radius);
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .bismillah {
+            font-family: 'Amiri', serif;
+            font-size: 2.4rem;
+            text-align: center;
+            margin: 1.5rem 0;
+            color: var(--accent);
+        }
+
+        /* Loading & Splash */
+        #loading {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(4px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        #splash {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(135deg, var(--primary-dark) 0%, #0f172a 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 3000;
+            transition: opacity 0.5s;
+        }
+
+        #splash .splash-logo {
+            font-size: 4rem;
+            color: var(--accent);
+            animation: pulse 2s infinite;
+        }
+
+        #splash h2 {
+            color: white;
+            font-weight: 600;
+            margin-top: 1rem;
+        }
+
+        .ramadan-text {
+            font-family: 'Amiri', serif;
+            font-size: 2.2rem;
+            color: var(--accent);
+            margin-bottom: 1.5rem;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+
+            50% {
+                transform: scale(1.1);
+                opacity: 0.8;
+            }
+        }
+
+        /* Search Box */
+        .search-box {
+            padding: 1rem;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            background: var(--bg);
+            color: var(--text);
+            font-size: 0.95rem;
+            transition: all 0.2s;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15);
+        }
+
+        /* Cards & Settings */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+        }
+
+        .card-title {
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .language-selector {
+            background: var(--surface);
+            padding: 1.25rem;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+        }
+
+        .form-select,
+        .form-control {
+            background: var(--bg);
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 0.6rem 0.75rem;
+        }
+
+        .form-select:focus,
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15);
+        }
+
+        .form-check-input:checked {
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        /* Buttons */
+        .mobile-menu-toggle,
+        .scroll-top-btn {
+            position: fixed;
+            right: 20px;
+            z-index: 999;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 52px;
+            height: 52px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+            transition: all 0.3s;
+        }
+
+        .mobile-menu-toggle {
+            bottom: 220px;
+            /* Moved up to clear audio player */
+        }
+
+        .scroll-top-btn {
+            bottom: 230px;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .scroll-top-btn.visible {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .mobile-menu-toggle:hover,
+        .scroll-top-btn:hover {
+            transform: scale(1.08);
+        }
+
+        /* Progress Bar */
+        .progress {
+            border-radius: var(--radius-sm);
+            background: var(--border);
+        }
+
+        .progress-bar {
+            background: linear-gradient(90deg, var(--primary), var(--primary-light));
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: -100%;
+                width: 85%;
+                max-width: 320px;
+                height: 100vh;
+                z-index: 2000;
+                transition: left 0.3s ease;
+                box-shadow: var(--shadow-lg);
+            }
+
+            .sidebar.show {
+                left: 0;
+            }
+
+            .sidebar-overlay {
+                position: fixed;
+                inset: 0;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 1999;
+                display: none;
+                backdrop-filter: blur(2px);
+            }
+
+            .sidebar-overlay.show {
+                display: block;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .arabic-text {
+                font-size: 1.6rem;
+                line-height: 2.2;
+            }
+
+            .translation-text {
+                font-size: 1rem;
+            }
+
+            .bismillah {
+                font-size: 1.8rem;
+            }
+
+            .ayah-container {
+                padding: 1rem;
+            }
+
+            .surah-info {
+                padding: 1.25rem;
+            }
+
+            .player-btn {
+                width: 40px;
+                height: 40px;
+            }
+
+            .audio-player {
+                padding: 1rem;
+                width: 100%;
+                left: 0;
+                transform: none;
+                bottom: 0;
+                border-radius: var(--radius) var(--radius) 0 0;
+                border: none;
+                border-top: 1px solid var(--border);
+            }
+
+            .audio-player .form-range {
+                margin-bottom: 0.5rem;
+            }
+
+            .player-controls {
+                gap: 8px;
+                justify-content: space-between;
+            }
+
+            /* Hide distracting labels on mobile */
+            .player-controls>span.ms-3 {
+                display: none;
+            }
+
+            #playbackSpeed {
+                font-size: 0.8rem;
+                padding: 0.25rem 1.5rem 0.25rem 0.5rem;
+                /* Compact padding */
+                width: auto !important;
+            }
+        }
+
+        /* Dropdown Styles for Player */
+        .sleep-timer-dropdown .dropdown-menu {
+            bottom: 150%;
+            /* Position above the button */
+            top: auto;
+            margin-bottom: 0.5rem;
+            background: var(--surface);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .sleep-timer-dropdown .dropdown-item {
+            color: var(--text);
+            font-size: 0.9rem;
+            border-radius: 4px;
+            margin: 2px 4px;
+            width: auto;
+        }
+
+        .sleep-timer-dropdown .dropdown-item:hover,
+        .sleep-timer-dropdown .dropdown-item.active {
+            background: var(--primary-light);
+            color: white;
+        }
+
+        .sleep-timer-dropdown .dropdown-item.active i {
+            color: white !important;
+        }
+
+        .sleep-timer-dropdown .btn-link {
+            text-decoration: none;
+            position: relative;
+        }
+
+        .sleep-timer-dropdown button i#sleepTimerIcon {
+            color: var(--primary);
+            width: 44px;
+            /* Match other player buttons */
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--surface);
+            border-radius: 50%;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(13, 148, 136, 0.3);
+        }
+
+        .sleep-timer-dropdown button:hover i#sleepTimerIcon {
+            background: var(--primary);
+            color: white;
+            transform: scale(1.08);
+            /* Match other player buttons */
+        }
+
+        /* Modal */
+        .modal-content {
+            background: var(--surface);
+            color: var(--text);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+        }
+
+        .nav-tabs .nav-link {
+            color: var(--text-muted);
+            border: none;
+            padding: 0.75rem 1rem;
+        }
+
+        .nav-tabs .nav-link.active {
+            color: var(--primary);
+            background: transparent;
+            border-bottom: 2px solid var(--primary);
+        }
+
+        .list-group-item {
+            background: transparent;
+            border-color: var(--border);
+            color: var(--text);
+        }
+
+        /* Badge */
+        .badge {
+            font-weight: 500;
+            padding: 0.5em 0.8em;
+        }
+
+        /* ======== ANALYTICS STYLES ======== */
+        .analytics-modal {
+            background: var(--surface);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .stat-card {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.25rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 0.75rem;
+            color: white;
+            font-size: 1.25rem;
+        }
+
+        .stat-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text);
+            line-height: 1.2;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text);
+            margin-top: 0.25rem;
+        }
+
+        .stat-sub {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .analytics-card {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.25rem;
+        }
+
+        .text-primary {
+            color: var(--primary) !important;
+        }
+
+        .text-accent {
+            color: var(--accent) !important;
+        }
+
+        /* Weekly Chart */
+        .weekly-chart {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            height: 140px;
+            padding: 1rem 0;
+            gap: 8px;
+        }
+
+        .chart-bar-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100%;
+        }
+
+        .chart-bar-container span {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+        }
+
+        .chart-bar {
+            width: 100%;
+            max-width: 40px;
+            background: linear-gradient(180deg, var(--primary), var(--primary-light));
+            border-radius: 6px 6px 0 0;
+            min-height: 4px;
+            transition: height 0.5s ease;
+            flex-grow: 1;
+            align-self: flex-end;
+        }
+
+        /* Heatmap Grid */
+        .heatmap-grid {
+            display: grid;
+            grid-template-columns: repeat(19, 1fr);
+            gap: 3px;
+        }
+
+        .heatmap-cell {
+            aspect-ratio: 1;
+            border-radius: 4px;
+            background: var(--border);
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .heatmap-cell.read {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+        }
+
+        .heatmap-cell:hover {
+            transform: scale(1.2);
+            z-index: 1;
+        }
+
+        /* Streak Card */
+        .streak-card {
+            text-align: center;
+            background: linear-gradient(135deg, rgba(244, 63, 94, 0.1), rgba(251, 113, 133, 0.05));
+            border-color: rgba(244, 63, 94, 0.2);
+        }
+
+        .streak-flame {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .streak-number {
+            font-size: 3rem;
+            font-weight: 800;
+            color: #f43f5e;
+            line-height: 1;
+        }
+
+        .streak-label {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        /* Activity Feed */
+        .activity-feed {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.875rem;
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-item.empty {
+            color: var(--text-muted);
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .activity-item .activity-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 0.75rem;
+        }
+
+        .activity-item .activity-text {
+            flex: 1;
+        }
+
+        .activity-item .activity-time {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* Calendar Grid */
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            border-radius: 4px;
+            background: var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            transition: all 0.2s;
+        }
+
+        .calendar-day.active {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+        }
+
+        /* Button Styles */
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border: none;
+            padding: 0.6rem 1.5rem;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--primary-light), var(--primary));
+        }
+
+        .btn-outline-secondary {
+            border-color: var(--border);
+            color: var(--text-muted);
+        }
+
+        .btn-outline-secondary:hover {
+            background: var(--bg);
+            border-color: var(--text-muted);
+            color: var(--text);
+        }
+
+        @media (max-width: 768px) {
+            .stat-card {
+                padding: 1rem;
+            }
+
+            .stat-value {
+                font-size: 1.5rem;
+            }
+
+            .stat-icon {
+                width: 40px;
+                height: 40px;
+                font-size: 1rem;
+            }
+
+            .weekly-chart {
+                height: 100px;
+            }
+
+            .heatmap-grid {
+                grid-template-columns: repeat(12, 1fr);
+            }
+
+            .streak-number {
+                font-size: 2.5rem;
+            }
+        }
+
+        /* ======== NEW FEATURES STYLES ======== */
+
+        /* Options Card */
+        .options-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+        }
+
+        .font-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            padding-top: 0.5rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .font-slider-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .font-slider-group label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .font-slider-group .form-range {
+            height: 6px;
+        }
+
+        /* Sleep Timer */
+        .sleep-timer-select {
+            background: var(--surface);
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 0.4rem 0.6rem;
+            font-size: 0.85rem;
+        }
+
+        .sleep-timer-badge {
+            background: var(--accent);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        /* Bookmarks & Notes Icons */
+        .ayah-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+        }
+
+        .ayah-action-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            padding: 0.4rem;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+        }
+
+        .ayah-action-btn:hover {
+            color: var(--primary);
+            background: rgba(13, 148, 136, 0.1);
+        }
+
+        .ayah-action-btn.bookmarked {
+            color: #f43f5e;
+        }
+
+        .ayah-action-btn.has-note {
+            color: var(--accent);
+        }
+
+        /* Search */
+        .search-results-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            box-shadow: var(--shadow-lg);
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+        }
+
+        .search-result-item {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .search-result-item:hover {
+            background: var(--surface-hover);
+        }
+
+        .search-result-item:last-child {
+            border-bottom: none;
+        }
+
+        /* Salah Times */
+        .salah-times-card {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border-radius: var(--radius);
+            padding: 1rem;
+        }
+
+        .salah-times-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .next-prayer-countdown {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .salah-times-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+        }
+
+        .salah-time-item {
+            text-align: center;
+            padding: 0.5rem;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: var(--radius-sm);
+        }
+
+        .salah-time-item.active {
+            background: var(--accent);
+        }
+
+        .salah-time-name {
+            font-size: 0.75rem;
+            opacity: 0.9;
+        }
+
+        .salah-time-value {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        /* Location selector */
+        .location-input-group {
+            position: relative;
+        }
+
+        .location-suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            box-shadow: var(--shadow-lg);
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1001;
+            display: none;
+        }
+
+        /* Juz Navigation */
+        .juz-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .juz-item {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .juz-item:hover {
+            background: var(--surface-hover);
+        }
+
+        .juz-item.active {
+            background: linear-gradient(135deg, rgba(13, 148, 136, 0.1), rgba(13, 148, 136, 0.05));
+            border-left: 3px solid var(--primary);
+        }
+
+        /* Notes Modal */
+        .notes-textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        /* Keyboard shortcuts indicator */
+        .shortcut-hint {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            background: var(--surface);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+        }
+
+        /* Tutorial Modal */
+        .tutorial-section {
+            background: var(--surface-hover);
+            border-radius: var(--radius-sm);
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .tutorial-section h6 {
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: var(--text);
+        }
+
+        .tutorial-section ul {
+            margin-bottom: 0;
+            padding-left: 1.25rem;
+        }
+
+        .tutorial-section li {
+            margin-bottom: 0.5rem;
+            color: var(--text-muted);
+        }
+
+        .tutorial-section kbd {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 0.15rem 0.4rem;
+            font-size: 0.85rem;
+        }
+
+        /* Theme Buttons */
+        .theme-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .theme-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .theme-btn.active {
+            border-color: var(--surface);
+            box-shadow: 0 0 0 2px var(--text);
+        }
+
+        /* Bootstrap Overrides for Dynamic Theming */
+        :root {
+            --bs-primary: var(--primary);
+            --bs-link-color: var(--primary);
+            --bs-link-hover-color: var(--primary-dark);
+        }
+
+        .btn-primary {
+            --bs-btn-bg: var(--primary);
+            --bs-btn-border-color: var(--primary);
+            --bs-btn-hover-bg: var(--primary-dark);
+            --bs-btn-hover-border-color: var(--primary-dark);
+            --bs-btn-active-bg: var(--primary-dark);
+            --bs-btn-active-border-color: var(--primary-dark);
+            --bs-btn-disabled-bg: var(--primary);
+            --bs-btn-disabled-border-color: var(--primary);
+        }
+
+        .text-primary {
+            color: var(--primary) !important;
+        }
+
+        .bg-primary {
+            background-color: var(--primary) !important;
+        }
+
+        .form-check-input:checked {
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 0.25rem rgba(13, 148, 136, 0.25);
+            /* Using teal as base for shadow, JS could make this dynamic too */
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Splash Screen -->
+    <div id="splash">
+        <div class="ramadan-text">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</div>
+        <div class="splash-logo">
+            <i class="fas fa-book-quran"></i>
+        </div>
+        <h2>Al Quran</h2>
+        <div class="spinner-border text-success mt-3" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+
+    <!-- Loading screen -->
+    <div id="loading" style="display: none;">
+        <div class="spinner-border text-success" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#"><i class="fas fa-book-quran me-2"></i>Al Quran</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarSupportedContent">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#salahTimesModal">
+                            <i class="fas fa-mosque me-1"></i>
+                            <span id="nextPrayerName">Prayer Times</span>
+                            <span class="badge bg-light text-dark ms-1" id="nextPrayerTime"
+                                style="display: none;"></span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#bookmarksModal">
+                            <i class="fas fa-bookmark"></i> Bookmarks
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#analyticsModal">
+                            <i class="fas fa-chart-bar"></i> Analytics
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="toggleDarkMode">
+                            <i class="fas fa-moon"></i> Dark Mode
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#tutorialModal">
+                            <i class="fas fa-question-circle"></i> Help
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#settingsModal">
+                            <i class="fas fa-cog"></i> Settings
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile menu toggle button -->
+    <button class="mobile-menu-toggle d-lg-none" id="mobileSidebarToggle">
+        <i class="fas fa-list"></i>
+    </button>
+
+    <!-- Sidebar overlay (mobile) -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Main Content -->
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar / Surah List -->
+            <div class="col-lg-3 p-0">
+                <div class="sidebar">
+                    <div class="sidebar-title">
+                        <i class="fas fa-list me-2"></i> Surah List
+                    </div>
+                    <div class="search-box">
+                        <input type="text" id="surahSearch" placeholder="Search surah...">
+                    </div>
+                    <div id="surahList">
+                        <!-- Surah list will be loaded here -->
+                    </div>
+                    <!-- Sidebar Footer -->
+                    <div class="sidebar-footer border-top p-3 bg-light small text-center">
+                        <p class="mb-1 text-muted">Thinking...</p>
+                        <p class="mb-1">
+                            Developed by <a href="https://shaheenalamjony.github.io/me/" target="_blank"
+                                class="fw-semibold text-decoration-none" style="color: var(--primary);">Shaheen Alam
+                                Jony</a>
+                        </p>
+                        <p class="mb-0 text-muted" style="font-size: 0.75rem;">
+                            &copy;
+                            <script>document.write(new Date().getFullYear())</script> All rights reserved.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content Area -->
+            <div class="col-lg-9 py-4">
+                <div class="container">
+                    <!-- Display and Translation options - MOVED TO SETTINGS MODAL -->
+
+                    <!-- Surah content will be loaded here -->
+
+                    <!-- Surah content will be loaded here -->
+                    <div id="surahContent" class="mb-5 pb-5"></div>
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scroll to top button -->
+    <button class="scroll-top-btn" id="scrollTopBtn">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <!-- Audio Player -->
+    <div class="audio-player" id="audioPlayer" style="display: none;">
+        <div class="row">
+            <div class="col-12 mb-2">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span id="currentAyahInfo"></span>
+                    <span id="currentTime">00:00 / 00:00</span>
+                </div>
+                <input type="range" class="form-range" id="audioProgress" min="0" max="100" value="0">
+            </div>
+            <div class="col-12">
+                <div class="player-controls">
+                    <button class="player-btn" id="prevAyah"><i class="fas fa-step-backward"></i></button>
+                    <button class="player-btn" id="playPause"><i class="fas fa-play"></i></button>
+                    <button class="player-btn" id="nextAyah"><i class="fas fa-step-forward"></i></button>
+                    <button class="player-btn" id="repeatAyah"><i class="fas fa-redo"></i></button>
+                    <span class="ms-3">Speed: </span>
+                    <select id="playbackSpeed" class="form-select form-select-sm" style="width: 70px;">
+                        <option value="0.5">0.5x</option>
+                        <option value="0.75">0.75x</option>
+                        <option value="1" selected>1x</option>
+                        <option value="1.25">1.25x</option>
+                        <option value="1.5">1.5x</option>
+                        <option value="2">2x</option>
+                    </select>
+                    <span class="ms-3"><i class="fas fa-moon"></i></span>
+                    <div class="dropdown sleep-timer-dropdown position-relative d-inline-block">
+                        <button class="btn btn-sm btn-link text-white p-0" type="button" data-bs-toggle="dropdown"
+                            aria-expanded="false" title="Sleep Timer">
+                            <i class="fas fa-stopwatch" id="sleepTimerIcon"></i>
+                            <span
+                                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                                id="sleepTimerBadge" style="display: none; font-size: 0.6rem;"></span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="min-width: 150px;">
+                            <li><span class="dropdown-header small text-muted text-uppercase fw-bold">Sleep Timer</span>
+                            </li>
+                            <li><a class="dropdown-item active" href="#" data-value="0"><i
+                                        class="fas fa-ban me-2 text-muted"></i>Timer Off</a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item" href="#" data-value="5">5 minutes</a></li>
+                            <li><a class="dropdown-item" href="#" data-value="10">10 minutes</a></li>
+                            <li><a class="dropdown-item" href="#" data-value="15">15 minutes</a></li>
+                            <li><a class="dropdown-item" href="#" data-value="30">30 minutes</a></li>
+                            <li><a class="dropdown-item" href="#" data-value="60">1 hour</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Salah Times Modal -->
+    <div class="modal fade" id="salahTimesModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="background: var(--surface);">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title"><i class="fas fa-mosque me-2" style="color: var(--primary);"></i>Prayer
+                        Times</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="salah-times-card mb-3">
+                        <div class="salah-times-header">
+                            <div><i class="fas fa-map-marker-alt me-1"></i><span id="currentLocation">Set
+                                    Location</span></div>
+                            <button class="btn btn-sm btn-light" data-bs-toggle="modal" data-bs-target="#locationModal">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </div>
+                        <div id="salahTimesGrid" class="salah-times-grid">
+                            <div class="text-center py-3 w-100">
+                                <small>Set your location to view prayer times</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Location Modal -->
+    <div class="modal fade" id="locationModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="background: var(--surface);">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title"><i class="fas fa-map-marker-alt me-2" style="color: var(--primary);"></i>Set
+                        Location</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Country</label>
+                        <select class="form-select" id="countrySelect" style="width: 100%;">
+                            <option value="">Select Country...</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">City</label>
+                        <select class="form-select" id="citySelect" style="width: 100%;" disabled>
+                            <option value="">Select Country first...</option>
+                        </select>
+                    </div>
+                    <div class="mb-3" id="timezoneInfo" style="display: none;">
+                        <label class="form-label fw-semibold">Timezone</label>
+                        <div class="alert alert-info py-2 mb-0">
+                            <i class="fas fa-clock me-2"></i>
+                            <span id="timezoneDisplay">UTC+6:00</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="saveLocationBtn" disabled>
+                        <i class="fas fa-save me-1"></i>Save Location
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bookmarks Modal -->
+    <div class="modal fade" id="bookmarksModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content" style="background: var(--surface);">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title"><i class="fas fa-bookmark me-2" style="color: #f43f5e;"></i>My Bookmarks
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="bookmarksList">
+                        <div class="text-center text-muted py-4">
+                            <i class="fas fa-bookmark fa-2x mb-2"></i>
+                            <p>No bookmarks yet</p>
+                            <small>Click the heart icon on any verse to bookmark it</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tutorial/Help Modal -->
+    <div class="modal fade" id="tutorialModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content" style="background: var(--surface);">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title"><i class="fas fa-book-open me-2" style="color: var(--primary);"></i>How to
+                        Use Al Quran App</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Select Language / ভাষা নির্বাচন করুন</label>
+                        <select id="tutorialLang" class="form-select">
+                            <option value="en" selected>English</option>
+                            <option value="bn">বাংলা (Bengali)</option>
+                            <option value="ar">العربية (Arabic)</option>
+                            <option value="ur">اردو (Urdu)</option>
+                            <option value="hi">हिन्दी (Hindi)</option>
+                            <option value="id">Bahasa Indonesia</option>
+                        </select>
+                    </div>
+
+                    <!-- English Tutorial -->
+                    <div id="tutorial-en" class="tutorial-content">
+                        <div class="tutorial-section">
+                            <h6><i class="fas fa-book-quran text-primary me-2"></i>Reading Quran</h6>
+                            <ul>
+                                <li>Select any Surah from the sidebar on the left</li>
+                                <li>Use the search box to find a specific Surah</li>
+                                <li>Click the play button on any verse to listen</li>
+                            </ul>
+                        </div>
+                        <div class="tutorial-section">
+                            <h6><i class="fas fa-heart text-danger me-2"></i>Bookmarks</h6>
+                            <ul>
+                                <li>Click the <strong>heart icon</strong> ❤️ on any verse to bookmark it</li>
+                                <li>View all bookmarks from the "Bookmarks" menu</li>
+                                <li>Bookmarks are saved permanently</li>
+                            </ul>
+                        </div>
+                        <div class="tutorial-section">
+                            <h6><i class="fas fa-sticky-note text-warning me-2"></i>Notes</h6>
+                            <ul>
+                                <li>Click the <strong>note icon</strong> 📝 on any verse</li>
+                                <li>Add your personal reflections</li>
+                                <li>Notes are saved automatically</li>
+                            </ul>
+                        </div>
+                        <div class="tutorial-section">
+                            <h6><i class="fas fa-mosque text-primary me-2"></i>Prayer Times</h6>
+                            <ul>
+                                <li>Click "Prayer Times" in the menu</li>
+                                <li>Set your city and country</li>
+                                <li>Prayer times will show in the navbar</li>
+                            </ul>
+                        </div>
+                        <div class="tutorial-section">
+                            <h6><i class="fas fa-keyboard me-2"></i>Keyboard Shortcuts</h6>
+                            <ul>
+                                <li><kbd>Space</kbd> - Play/Pause audio</li>
+                                <li><kbd>←</kbd> <kbd>→</kbd> - Previous/Next verse</li>
+                                <li><kbd>Esc</kbd> - Close modals</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Bengali Tutorial -->
+                    <div id="tutorial-bn" class="tutorial-content" style="display: none;">
+                        <div class="tutorial-section" dir="ltr">
+                            <h6><i class="fas fa-book-quran text-primary me-2"></i>কুরআন পড়া</h6>
+                            <ul>
+                                <li>বাম পাশের সাইডবার থেকে যেকোনো সূরা নির্বাচন করুন</li>
+                                <li>নির্দিষ্ট সূরা খুঁজতে সার্চ বক্স ব্যবহার করুন</li>
+                                <li>শুনতে যেকোনো আয়াতে প্লে বাটনে ক্লিক করুন</li>
+                            </ul>
+                        </div>
+                        <div class="tutorial-section">
+                            <h6><i class="fas fa-heart text-danger me-2"></i>বুকমার্ক</h6>
+                            <ul>
+                                <li>বুকমার্ক করতে যেকোনো আয়াতে <strong>হার্ট আইকনে</strong> ❤️ ক্লিক করুন</li>
+                                <li>"Bookmarks" মেনু থেকে সব বুকমার্ক দেখুন</li>
+                                <li>বুকমার্ক স্থায়ীভাবে সংরক্ষিত থাকে</li>
+                            </ul>
+                        </div>
+                        <div class="tutorial-section">
+                            <h6><i class="fas fa-sticky-note text-warning me-2"></i>নোট</h6>
+                            <ul>
+                                <li>যেকোনো আয়াতে <strong>নোট আইকনে</strong> 📝 ক্লিক করুন</li>
+                                <li>আপনার ব্যক্তিগত চিন্তাভাবনা লিখুন</li>
+                                <li>নোট স্বয়ংক্রিয়ভাবে সংরক্ষিত হয়</li>
+                            </ul>
+                        </div>
+                        <div class="tutorial-section">
+                            <h6><i class="fas fa-mosque text-primary me-2"></i>নামাজের সময়</h6>
+                            <ul>
+                                <li>মেনুতে "Prayer Times" এ ক্লিক করুন</li>
+                                <li>আপনার শহর ও দেশ সেট করুন</li>
+                                <li>নামাজের সময় নেভবারে দেখাবে</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Arabic Tutorial -->
+                    <div id="tutorial-ar" class="tutorial-content" style="display: none;" dir="rtl">
+                        <div class="tutorial-section">
+                            <h6><i class="fas fa-book-quran text-primary ms-2"></i>قراءة القرآن</h6>
+                            <ul>
+                                <li>اختر أي سورة من الشريط الجانبي</li>
+                                <li>استخدم مربع البحث للعثور على سورة معينة</li>
+                                <li>انقر على زر التشغيل للاستماع</li>
+                            </ul>
+                        </div>
+                        <div class="tutorial-section">
+                            <h6><i class="fas fa-heart text-danger ms-2"></i>الإشارات المرجعية</h6>
+                            <ul>
+                                <li>انقر على <strong>أيقونة القلب</strong> ❤️ لحفظ الآية</li>
+                                <li>عرض جميع الإشارات من قائمة "Bookmarks"</li>
+                                <li>يتم حفظ الإشارات بشكل دائم</li>
+                            </ul>
+                        </div>
+                        <div class="tutorial-section">
+                            <h6><i class="fas fa-mosque text-primary ms-2"></i>مواقيت الصلاة</h6>
+                            <ul>
+                                <li>انقر على "Prayer Times" في القائمة</li>
+                                <li>حدد مدينتك وبلدك</li>
+                                <li>ستظهر أوقات الصلاة في شريط التنقل</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Urdu Tutorial -->
+                    <div id="tutorial-ur" class="tutorial-content" style="display: none;" dir="rtl">
+                        <div class="tutorial-section">
+                            <h6><i class="fas fa-book-quran text-primary ms-2"></i>قرآن پڑھنا</h6>
+                            <ul>
+                                <li>سائیڈ بار سے کوئی بھی سورۃ منتخب کریں</li>
+                                <li>مخصوص سورۃ تلاش کرنے کے لیے سرچ باکس استعمال کریں</li>
+                                <li>سننے کے لیے پلے بٹن پر کلک کریں</li>
+                            </ul>
+                        </div>
+                        <div class="tutorial-section">
+                            <h6><i class="fas fa-heart text-danger ms-2"></i>بک مارکس</h6>
+                            <ul>
+                                <li>بک مارک کرنے کے لیے <strong>دل کے آئیکن</strong> ❤️ پر کلک کریں</li>
+                                <li>"Bookmarks" مینو سے سب بک مارکس دیکھیں</li>
+                            </ul>
+                        </div>
+                        <div class="tutorial-section">
+                            <h6><i class="fas fa-mosque text-primary ms-2"></i>نماز کے اوقات</h6>
+                            <ul>
+                                <li>مینو میں "Prayer Times" پر کلک کریں</li>
+                                <li>اپنا شہر اور ملک سیٹ کریں</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Hindi Tutorial -->
+                    <div id="tutorial-hi" class="tutorial-content" style="display: none;">
+                        <div class="tutorial-section">
+                            <h6><i class="fas fa-book-quran text-primary me-2"></i>कुरान पढ़ना</h6>
+                            <ul>
+                                <li>साइडबार से कोई भी सूरा चुनें</li>
+                                <li>किसी सूरा को खोजने के लिए सर्च बॉक्स का उपयोग करें</li>
+                                <li>सुनने के लिए प्ले बटन पर क्लिक करें</li>
+                            </ul>
+                        </div>
+                        <div class="tutorial-section">
+                            <h6><i class="fas fa-heart text-danger me-2"></i>बुकमार्क</h6>
+                            <ul>
+                                <li>बुकमार्क करने के लिए <strong>हार्ट आइकन</strong> ❤️ पर क्लिक करें</li>
+                                <li>"Bookmarks" मेनू से सभी बुकमार्क देखें</li>
+                            </ul>
+                        </div>
+                        <div class="tutorial-section">
+                            <h6><i class="fas fa-mosque text-primary me-2"></i>नमाज़ का समय</h6>
+                            <ul>
+                                <li>मेनू में "Prayer Times" पर क्लिक करें</li>
+                                <li>अपना शहर और देश सेट करें</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Indonesian Tutorial -->
+                    <div id="tutorial-id" class="tutorial-content" style="display: none;">
+                        <div class="tutorial-section">
+                            <h6><i class="fas fa-book-quran text-primary me-2"></i>Membaca Quran</h6>
+                            <ul>
+                                <li>Pilih surah dari sidebar di sebelah kiri</li>
+                                <li>Gunakan kotak pencarian untuk menemukan surah</li>
+                                <li>Klik tombol putar untuk mendengarkan</li>
+                            </ul>
+                        </div>
+                        <div class="tutorial-section">
+                            <h6><i class="fas fa-heart text-danger me-2"></i>Bookmark</h6>
+                            <ul>
+                                <li>Klik <strong>ikon hati</strong> ❤️ untuk bookmark ayat</li>
+                                <li>Lihat semua bookmark dari menu "Bookmarks"</li>
+                            </ul>
+                        </div>
+                        <div class="tutorial-section">
+                            <h6><i class="fas fa-mosque text-primary me-2"></i>Waktu Shalat</h6>
+                            <ul>
+                                <li>Klik "Prayer Times" di menu</li>
+                                <li>Atur kota dan negara Anda</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Got it!</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal fade" id="settingsModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="background: var(--surface);">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title"><i class="fas fa-cog me-2" style="color: var(--primary);"></i>Settings &
+                        Appearance</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Tabs -->
+                    <ul class="nav nav-tabs mb-3" id="settingsTabs" role="tablist">
+                        <li class="nav-item">
+                            <button class="nav-link active" id="display-tab" data-bs-toggle="tab"
+                                data-bs-target="#display" type="button">Display</button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" id="theme-tab" data-bs-toggle="tab" data-bs-target="#theme"
+                                type="button">Theme</button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content" id="settingsTabContent">
+                        <!-- Display Settings -->
+                        <div class="tab-pane fade show active" id="display" role="tabpanel">
+                            <div class="mb-3">
+                                <label class="fw-bold mb-2">Content Visibility</label>
+                                <div class="d-flex gap-3 flex-wrap">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="showArabic" checked>
+                                        <label class="form-check-label" for="showArabic">Arabic</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="showTranslation" checked>
+                                        <label class="form-check-label" for="showTranslation">Translation</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="showTransliteration">
+                                        <label class="form-check-label"
+                                            for="showTransliteration">Transliteration</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr class="opacity-25">
+
+                            <div class="mb-3">
+                                <label class="fw-bold mb-2">Font Sizes</label>
+                                <div class="row g-3">
+                                    <div class="col-12">
+                                        <label class="small text-muted"><i class="fas fa-font me-1"></i>Arabic (<span
+                                                id="arabicSizeLabel">28</span>px)</label>
+                                        <input type="range" class="form-range" id="arabicFontSize" min="20" max="48"
+                                            value="28">
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="small text-muted"><i
+                                                class="fas fa-text-height me-1"></i>Translation (<span
+                                                id="translationSizeLabel">16</span>px)</label>
+                                        <input type="range" class="form-range" id="translationFontSize" min="12"
+                                            max="24" value="16">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr class="opacity-25">
+
+                            <div class="mb-3">
+                                <label class="fw-bold mb-2">Reading Preferences</label>
+                                <div class="mb-2">
+                                    <label for="reciterSelect" class="form-label small text-muted">Reciter</label>
+                                    <select id="reciterSelect" class="form-select form-select-sm">
+                                        <option value="ar.alafasy">Mishary Rashid Alafasy</option>
+                                        <option value="ar.abdulbasitmurattal">Abdul Basit Murattal</option>
+                                        <option value="ar.abdurrahmaansudais">Abdurrahmaan As-Sudais</option>
+                                        <option value="ar.hanirifai">Hani Ar-Rifai</option>
+                                        <option value="ar.minshawi">Mohamed Siddiq al-Minshawi</option>
+                                    </select>
+                                </div>
+                                <div class="mb-2">
+                                    <label for="translationSelect" class="form-label small text-muted">Translation
+                                        Language</label>
+                                    <select id="translationSelect" class="form-select form-select-sm">
+                                        <option value="en.sahih">English - Sahih International</option>
+                                        <option value="bn.bengali">Bengali</option>
+                                        <option value="ur.jalandhry">Urdu - Jalandhry</option>
+                                        <option value="fr.hamidullah">French - Hamidullah</option>
+                                        <option value="es.cortes">Spanish - Cortes</option>
+                                        <option value="ru.kuliev">Russian - Kuliev</option>
+                                        <option value="zh.jian">Chinese - Ma Jian</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Theme Settings -->
+                        <div class="tab-pane fade" id="theme" role="tabpanel">
+                            <div class="mb-4">
+                                <label class="fw-bold mb-3 d-block">App Color Theme</label>
+                                <div class="d-flex gap-3 flex-wrap justify-content-center" id="themeSelector">
+                                    <button class="theme-btn active" data-theme="teal"
+                                        style="background-color: #0d9488;" title="Teal (Default)"></button>
+                                    <button class="theme-btn" data-theme="blue" style="background-color: #2563eb;"
+                                        title="Blue"></button>
+                                    <button class="theme-btn" data-theme="purple" style="background-color: #7c3aed;"
+                                        title="Purple"></button>
+                                    <button class="theme-btn" data-theme="green" style="background-color: #16a34a;"
+                                        title="Green"></button>
+                                    <button class="theme-btn" data-theme="orange" style="background-color: #ea580c;"
+                                        title="Orange"></button>
+                                    <button class="theme-btn" data-theme="pink" style="background-color: #db2777;"
+                                        title="Pink"></button>
+                                    <button class="theme-btn" data-theme="slate" style="background-color: #475569;"
+                                        title="Slate"></button>
+                                </div>
+                                <div class="text-center mt-3 text-muted small">Select a color to update the app's look
+                                    instantly.</div>
+                            </div>
+
+                            <div class="alert alert-light border small">
+                                <i class="fas fa-info-circle me-2 text-primary"></i>
+                                Theme preference is saved automatically to your device.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Done</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Analytics Modal -->
+    <div class="modal fade" id="analyticsModal" tabindex="-1" aria-labelledby="analyticsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content analytics-modal">
+                <div class="modal-header border-0 pb-0">
+                    <div>
+                        <h4 class="modal-title fw-bold" id="analyticsModalLabel">
+                            <i class="fas fa-chart-line me-2" style="color: var(--primary);"></i>Reading Analytics
+                        </h4>
+                        <p class="text-muted mb-0 small">Track your Quran reading journey</p>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body pt-3">
+                    <!-- Stats Overview Cards -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-6 col-md-3">
+                            <div class="stat-card">
+                                <div class="stat-icon"
+                                    style="background: linear-gradient(135deg, var(--primary), var(--primary-light));">
+                                    <i class="fas fa-book-open"></i>
+                                </div>
+                                <div class="stat-value" id="versesRead">0</div>
+                                <div class="stat-label">Verses Read</div>
+                                <div class="stat-sub">of 6,236 total</div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="stat-card">
+                                <div class="stat-icon"
+                                    style="background: linear-gradient(135deg, var(--accent), var(--accent-light));">
+                                    <i class="fas fa-layer-group"></i>
+                                </div>
+                                <div class="stat-value" id="surahsCompleted">0</div>
+                                <div class="stat-label">Surahs Done</div>
+                                <div class="stat-sub">of 114 total</div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="stat-card">
+                                <div class="stat-icon" style="background: linear-gradient(135deg, #8b5cf6, #a78bfa);">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                                <div class="stat-value"><span id="totalTimeSpent">0</span><small class="fs-6">m</small>
+                                </div>
+                                <div class="stat-label">Time Spent</div>
+                                <div class="stat-sub">reading today</div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="stat-card">
+                                <div class="stat-icon" style="background: linear-gradient(135deg, #f43f5e, #fb7185);">
+                                    <i class="fas fa-fire"></i>
+                                </div>
+                                <div class="stat-value" id="currentStreak">0</div>
+                                <div class="stat-label">Day Streak</div>
+                                <div class="stat-sub">keep it going!</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Main Content Grid -->
+                    <div class="row g-4">
+                        <!-- Progress Section -->
+                        <div class="col-lg-8">
+                            <div class="analytics-card">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h6 class="fw-semibold mb-0"><i
+                                            class="fas fa-chart-bar me-2 text-primary"></i>Weekly Activity</h6>
+                                    <span class="badge bg-primary bg-opacity-10 text-primary">This Week</span>
+                                </div>
+                                <div class="weekly-chart">
+                                    <div class="chart-bar-container">
+                                        <div class="chart-bar" id="mondayBar" data-day="Mon"></div>
+                                        <span>Mon</span>
+                                    </div>
+                                    <div class="chart-bar-container">
+                                        <div class="chart-bar" id="tuesdayBar" data-day="Tue"></div>
+                                        <span>Tue</span>
+                                    </div>
+                                    <div class="chart-bar-container">
+                                        <div class="chart-bar" id="wednesdayBar" data-day="Wed"></div>
+                                        <span>Wed</span>
+                                    </div>
+                                    <div class="chart-bar-container">
+                                        <div class="chart-bar" id="thursdayBar" data-day="Thu"></div>
+                                        <span>Thu</span>
+                                    </div>
+                                    <div class="chart-bar-container">
+                                        <div class="chart-bar" id="fridayBar" data-day="Fri"></div>
+                                        <span>Fri</span>
+                                    </div>
+                                    <div class="chart-bar-container">
+                                        <div class="chart-bar" id="saturdayBar" data-day="Sat"></div>
+                                        <span>Sat</span>
+                                    </div>
+                                    <div class="chart-bar-container">
+                                        <div class="chart-bar" id="sundayBar" data-day="Sun"></div>
+                                        <span>Sun</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Surah Heatmap -->
+                            <div class="analytics-card mt-3">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h6 class="fw-semibold mb-0"><i class="fas fa-th me-2 text-accent"></i>Surah
+                                        Progress</h6>
+                                    <span class="small text-muted"><span id="totalProgressPercent">0</span>%
+                                        Complete</span>
+                                </div>
+                                <div class="progress mb-3" style="height: 8px;">
+                                    <div id="totalProgressBar" class="progress-bar" role="progressbar"
+                                        style="width: 0%;"></div>
+                                </div>
+                                <div id="readingHeatmap" class="heatmap-grid"></div>
+                            </div>
+                        </div>
+
+                        <!-- Sidebar Stats -->
+                        <div class="col-lg-4">
+                            <!-- Streak Card -->
+                            <div class="analytics-card streak-card">
+                                <div class="streak-flame">🔥</div>
+                                <div class="streak-number" id="currentStreakLarge">0</div>
+                                <div class="streak-label">Day Streak</div>
+                                <hr class="my-3 opacity-25">
+                                <div class="d-flex justify-content-between small">
+                                    <span class="text-muted">Best Streak</span>
+                                    <span class="fw-semibold"><span id="longestStreak">0</span> days</span>
+                                </div>
+                                <div class="d-flex justify-content-between small mt-2">
+                                    <span class="text-muted">Avg. Daily</span>
+                                    <span class="fw-semibold"><span id="avgDailyTime">0</span> min</span>
+                                </div>
+                            </div>
+
+                            <!-- Recent Activity -->
+                            <div class="analytics-card mt-3">
+                                <h6 class="fw-semibold mb-3"><i class="fas fa-history me-2 text-muted"></i>Recent
+                                    Activity</h6>
+                                <div id="recentActivity" class="activity-feed">
+                                    <div class="activity-item empty">
+                                        <i class="fas fa-inbox"></i>
+                                        <span>No recent activity</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Consistency Calendar -->
+                            <div class="analytics-card mt-3">
+                                <h6 class="fw-semibold mb-3"><i class="fas fa-calendar-check me-2 text-muted"></i>Last
+                                    30 Days</h6>
+                                <div id="consistencyCalendar" class="calendar-grid"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-outline-secondary" id="resetAnalyticsBtn">
+                        <i class="fas fa-redo me-1"></i>Reset Data
+                    </button>
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Done</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            // ========================
+            // STATE MANAGEMENT
+            // ========================
+            const state = {
+                currentSurah: null,
+                currentAyahs: [],
+                currentAyahIndex: 0,
+                audioElement: new Audio(),
+                isPlaying: false,
+                isDarkMode: false,
+                reciter: localStorage.getItem('reciter') || 'ar.alafasy',
+                translation: localStorage.getItem('translation') || 'en.sahih',
+                transliteration: '',
+                allSurahs: [],
+                availableTransliterations: {
+                    'en.transliteration': 'English Transliteration'
+                },
+                lastSurah: parseInt(localStorage.getItem('lastSurah')) || 1,
+                lastAyah: parseInt(localStorage.getItem('lastAyah')) || 0,
+                analytics: {
+                    startTime: null,
+                    timeSpent: JSON.parse(localStorage.getItem('timeSpent')) || 0, // in seconds
+                    readVerses: JSON.parse(localStorage.getItem('readVerses')) || [],
+                    readSurahs: JSON.parse(localStorage.getItem('readSurahs')) || [],
+                    lastVisit: localStorage.getItem('lastVisit') || null,
+                    dailyActivity: JSON.parse(localStorage.getItem('dailyActivity')) || {},
+                    streak: {
+                        current: parseInt(localStorage.getItem('currentStreak')) || 0,
+                        longest: parseInt(localStorage.getItem('longestStreak')) || 0,
+                        lastDate: localStorage.getItem('lastStreakDate') || null
+                    },
+                    recentActivity: JSON.parse(localStorage.getItem('recentActivity')) || []
+                }
+            };
+
+            // ========================
+            // THEME MANAGEMENT
+            // ========================
+            const themes = {
+                teal: { primary: '#0d9488', light: '#14b8a6', dark: '#0f766e' },
+                blue: { primary: '#2563eb', light: '#60a5fa', dark: '#1e40af' },
+                purple: { primary: '#7c3aed', light: '#a78bfa', dark: '#5b21b6' },
+                green: { primary: '#16a34a', light: '#4ade80', dark: '#15803d' },
+                orange: { primary: '#ea580c', light: '#fb923c', dark: '#c2410c' },
+                pink: { primary: '#db2777', light: '#f472b6', dark: '#be185d' },
+                slate: { primary: '#475569', light: '#94a3b8', dark: '#334155' }
+            };
+
+            function hexToRgb(hex) {
+                const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+                return result ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : null;
+            }
+
+            function setTheme(themeName) {
+                const theme = themes[themeName] || themes.teal;
+                const root = document.documentElement;
+
+                // Update CSS variables
+                root.style.setProperty('--primary', theme.primary);
+                root.style.setProperty('--primary-light', theme.light);
+                root.style.setProperty('--primary-dark', theme.dark);
+
+                // Update specific Bootstrap variables that might need RGB components
+                const rgb = hexToRgb(theme.primary);
+                if (rgb) {
+                    root.style.setProperty('--bs-primary-rgb', rgb);
+                    // Update focus shadow color dynamically
+                    const focusStyle = document.createElement('style');
+                    focusStyle.innerHTML = `.form-control:focus, .form-select:focus { box-shadow: 0 0 0 0.25rem rgba(${rgb}, 0.25) !important; }`;
+                    // Remove old focus style if exists
+                    const oldStyle = document.getElementById('dynamic-focus-style');
+                    if (oldStyle) oldStyle.remove();
+                    focusStyle.id = 'dynamic-focus-style';
+                    document.head.appendChild(focusStyle);
+                }
+
+                // Save preference
+                localStorage.setItem('theme', themeName);
+
+                // Update UI state
+                $('.theme-btn').removeClass('active');
+                $(`.theme-btn[data-theme="${themeName}"]`).addClass('active');
+            }
+
+            function initTheme() {
+                const savedTheme = localStorage.getItem('theme') || 'teal';
+                setTheme(savedTheme);
+
+                $('.theme-btn').on('click', function () {
+                    const themeName = $(this).data('theme');
+                    setTheme(themeName);
+                });
+            }
+
+            function initSettings() {
+                // Initialize Inputs from State/Storage
+                $('#reciterSelect').val(state.reciter);
+                $('#translationSelect').val(state.translation);
+
+                // Font Sizes
+                const arabicSize = localStorage.getItem('arabicFontSize') || 28;
+                const transSize = localStorage.getItem('translationFontSize') || 16;
+
+                $('#arabicFontSize').val(arabicSize);
+                $('#arabicSizeLabel').text(arabicSize);
+                $('#translationFontSize').val(transSize);
+                $('#translationSizeLabel').text(transSize);
+
+                // Create Dynamic Font Style
+                const fontStyle = $('<style id="dynamic-font-style">').appendTo('head');
+
+                const updateFontStyles = (aSize, tSize) => {
+                    fontStyle.html(`
+                        .arabic-text { font-size: ${aSize}px !important; }
+                        .translation-text { font-size: ${tSize}px !important; }
+                    `);
+                };
+
+                updateFontStyles(arabicSize, transSize);
+
+                // Listeners
+                $('#arabicFontSize').on('input', function () {
+                    const size = $(this).val();
+                    $('#arabicSizeLabel').text(size);
+                    localStorage.setItem('arabicFontSize', size);
+                    updateFontStyles(size, $('#translationFontSize').val());
+                });
+
+                $('#translationFontSize').on('input', function () {
+                    const size = $(this).val();
+                    $('#translationSizeLabel').text(size);
+                    localStorage.setItem('translationFontSize', size);
+                    updateFontStyles($('#arabicFontSize').val(), size);
+                });
+
+                $('#reciterSelect').on('change', function () {
+                    state.reciter = $(this).val();
+                    localStorage.setItem('reciter', state.reciter);
+                    if (state.currentSurah) loadSurah(state.currentSurah.number);
+                });
+
+                $('#translationSelect').on('change', function () {
+                    state.translation = $(this).val();
+                    localStorage.setItem('translation', state.translation);
+                    if (state.currentSurah) loadSurah(state.currentSurah.number);
+                });
+            }
+
+            // ========================
+            // INITIALIZATION
+            // ========================
+            function init() {
+                initTheme(); // Initialize theme first
+                loadPreferences();
+                initSplashScreen();
+                fetchSurahs();
+                fetchAvailableEditions();
+                attachEventListeners();
+                // Load last position
+                loadLastPosition();
+
+                // Initialize analytics
+                initAnalytics();
+
+                // Initialize new features
+                // Initialize Settings
+                initSettings();
+
+                // Wire up new feature event listeners
+                // Sleep Timer Dropdown Listener
+                $('.sleep-timer-dropdown .dropdown-item').on('click', function (e) {
+                    e.preventDefault();
+
+                    // Update Active State
+                    $('.sleep-timer-dropdown .dropdown-item').removeClass('active');
+                    $(this).addClass('active');
+
+                    const value = parseInt($(this).data('value'));
+                    startSleepTimer(value);
+                });
+
+                $('#saveLocationBtn').on('click', function () {
+                    const city = $('#citySelect').val();
+                    const country = $('#countrySelect').val();
+                    const timezone = locationData[country] ? locationData[country].timezone : '';
+                    if (city && country) {
+                        saveLocation(city, country, timezone);
+                        loadPrayerTimes();
+                        bootstrap.Modal.getInstance(document.getElementById('locationModal')).hide();
+                    }
+                });
+
+                // Initialize Select2 for location modal
+                $('#locationModal').on('shown.bs.modal', function () {
+                    initLocationSelect2();
+                });
+
+                // Tutorial language switcher
+                $('#tutorialLang').on('change', function () {
+                    const lang = $(this).val();
+                    $('.tutorial-content').hide();
+                    $(`#tutorial-${lang}`).show();
+                });
+
+                // Load bookmarks when modal opens
+                $('#bookmarksModal').on('show.bs.modal', function () {
+                    loadBookmarksModal();
+                });
+            }
+
+            // Add this new function after init
+            function loadLastPosition() {
+                if (state.lastSurah && state.lastSurah > 0) {
+                    // Will be called once the surah list is loaded
+                    $(document).on('surahListLoaded', function () {
+                        loadSurah(state.lastSurah);
+                        $('.surah-list-item').removeClass('active');
+                        $(`.surah-list-item[data-surah-number="${state.lastSurah}"]`).addClass('active');
+
+                        // Need to wait for surah to load before scrolling to ayah
+                        $(document).on('surahLoaded', function () {
+                            if (state.lastAyah && state.lastAyah > 0) {
+                                // Scroll to the last ayah after a short delay
+                                setTimeout(() => {
+                                    updateAudioPlayer(state.lastAyah - 1);
+                                }, 500);
+                            }
+                            // Remove event listener to prevent multiple calls
+                            $(document).off('surahLoaded');
+                        });
+                    });
+                }
+            }
+
+            //#region analysis code
+
+            // Add these new functions for analytics
+            function initAnalytics() {
+                // Start the timer
+                state.analytics.startTime = new Date();
+
+                // Check for daily streak
+                updateStreak();
+
+                // Update analytics when the page is about to be unloaded
+                window.addEventListener('beforeunload', saveTimeSpent);
+
+                // Populate analytics panels
+                updateAnalyticsPanels();
+            }
+
+            function saveTimeSpent() {
+                if (state.analytics.startTime) {
+                    const now = new Date();
+                    const sessionTime = Math.floor((now - state.analytics.startTime) / 1000); // in seconds
+                    state.analytics.timeSpent += sessionTime;
+                    localStorage.setItem('timeSpent', JSON.stringify(state.analytics.timeSpent));
+
+                    // Save this session in daily activity
+                    const today = now.toISOString().split('T')[0]; // YYYY-MM-DD
+                    if (!state.analytics.dailyActivity[today]) {
+                        state.analytics.dailyActivity[today] = 0;
+                    }
+                    state.analytics.dailyActivity[today] += sessionTime;
+                    localStorage.setItem('dailyActivity', JSON.stringify(state.analytics.dailyActivity));
+
+                    // Update last visit
+                    localStorage.setItem('lastVisit', now.toISOString());
+                }
+            }
+
+            function updateStreak() {
+                const today = new Date().toISOString().split('T')[0];
+                const lastDate = state.analytics.streak.lastDate;
+
+                if (!lastDate) {
+                    // First visit
+                    state.analytics.streak.current = 1;
+                    state.analytics.streak.longest = 1;
+                    state.analytics.streak.lastDate = today;
+                } else {
+                    const lastDateObj = new Date(lastDate);
+                    const todayObj = new Date(today);
+
+                    // Calculate the difference in days
+                    const diffTime = todayObj - lastDateObj;
+                    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+                    if (diffDays === 0) {
+                        // Same day, do nothing
+                    } else if (diffDays === 1) {
+                        // Next day, increment streak
+                        state.analytics.streak.current++;
+                        if (state.analytics.streak.current > state.analytics.streak.longest) {
+                            state.analytics.streak.longest = state.analytics.streak.current;
+                        }
+                        state.analytics.streak.lastDate = today;
+                    } else {
+                        // Streak broken
+                        state.analytics.streak.current = 1;
+                        state.analytics.streak.lastDate = today;
+                    }
+                }
+
+                // Save streak data
+                localStorage.setItem('currentStreak', state.analytics.streak.current);
+                localStorage.setItem('longestStreak', state.analytics.streak.longest);
+                localStorage.setItem('lastStreakDate', state.analytics.streak.lastDate);
+            }
+
+            function trackVerse(surahNumber, ayahNumber) {
+                const verseId = `${surahNumber}:${ayahNumber}`;
+
+                // Check if this verse is already tracked
+                if (!state.analytics.readVerses.includes(verseId)) {
+                    state.analytics.readVerses.push(verseId);
+                    localStorage.setItem('readVerses', JSON.stringify(state.analytics.readVerses));
+
+                    // Add to recent activity
+                    addToRecentActivity('verse', surahNumber, ayahNumber);
+                }
+
+                // Check if entire surah is read
+                trackSurah(surahNumber);
+            }
+
+            function trackSurah(surahNumber) {
+                // Only add surah to completed list if not already there
+                if (!state.analytics.readSurahs.includes(surahNumber)) {
+                    const surah = state.allSurahs.find(s => s.number === surahNumber);
+
+                    if (surah) {
+                        // Check if all verses in surah are read
+                        const totalAyahs = surah.numberOfAyahs;
+                        const readAyahs = state.analytics.readVerses.filter(v => v.startsWith(`${surahNumber}:`)).length;
+
+                        if (readAyahs >= totalAyahs) {
+                            state.analytics.readSurahs.push(surahNumber);
+                            localStorage.setItem('readSurahs', JSON.stringify(state.analytics.readSurahs));
+
+                            // Add to recent activity
+                            addToRecentActivity('surah', surahNumber);
+                        }
+                    }
+                }
+            }
+
+            function addToRecentActivity(type, surahNumber, ayahNumber = null) {
+                const now = new Date().toISOString();
+                const surah = state.allSurahs.find(s => s.number === surahNumber);
+                let activity = {
+                    timestamp: now,
+                    type: type,
+                    surahNumber: surahNumber
+                };
+
+                if (type === 'verse') {
+                    activity.ayahNumber = ayahNumber;
+                    activity.text = `Read verse ${ayahNumber} of Surah ${surah ? surah.englishName : surahNumber}`;
+                } else {
+                    activity.text = `Completed Surah ${surah ? surah.englishName : surahNumber}`;
+                }
+
+                // Add to beginning of array (newest first)
+                state.analytics.recentActivity.unshift(activity);
+
+                // Keep only the latest 10 activities
+                if (state.analytics.recentActivity.length > 10) {
+                    state.analytics.recentActivity = state.analytics.recentActivity.slice(0, 10);
+                }
+
+                localStorage.setItem('recentActivity', JSON.stringify(state.analytics.recentActivity));
+
+                // Update analytics panels if modal is open
+                if ($('#analyticsModal').hasClass('show')) {
+                    updateAnalyticsPanels();
+                }
+            }
+
+            function updateAnalyticsPanels() {
+                // Update overall progress
+                const totalVerses = 6236;
+                const totalSurahs = 114;
+
+                const versesRead = state.analytics.readVerses.length;
+                const surahsCompleted = state.analytics.readSurahs.length;
+                const progressPercentage = Math.round((versesRead / totalVerses) * 100);
+
+                // Update stat cards
+                $('#totalProgressBar').css('width', `${progressPercentage}%`);
+                $('#totalProgressPercent').text(progressPercentage);
+                $('#surahsCompleted').text(surahsCompleted);
+                $('#versesRead').text(versesRead);
+
+                // Update recent activity with new styling
+                const recentActivityList = $('#recentActivity');
+                recentActivityList.empty();
+
+                if (state.analytics.recentActivity.length > 0) {
+                    state.analytics.recentActivity.slice(0, 5).forEach(activity => {
+                        const date = new Date(activity.timestamp);
+                        const timeAgo = getTimeAgo(date);
+                        const icon = activity.type === 'surah' ? 'fa-check-circle' : 'fa-book-reader';
+                        recentActivityList.append(`
+                            <div class="activity-item">
+                                <div class="activity-icon"><i class="fas ${icon}"></i></div>
+                                <div class="activity-text">
+                                    <div>${activity.text}</div>
+                                    <div class="activity-time">${timeAgo}</div>
+                                </div>
+                            </div>
+                        `);
+                    });
+                } else {
+                    recentActivityList.html(`
+                        <div class="activity-item empty">
+                            <i class="fas fa-inbox"></i>
+                            <span>No recent activity</span>
+                        </div>
+                    `);
+                }
+
+                // Update time statistics
+                const totalMinutes = Math.round(state.analytics.timeSpent / 60);
+                $('#totalTimeSpent').text(totalMinutes);
+
+                // Calculate average daily time
+                const dailyActivity = state.analytics.dailyActivity;
+                if (Object.keys(dailyActivity).length > 0) {
+                    const totalDailySeconds = Object.values(dailyActivity).reduce((a, b) => a + b, 0);
+                    const avgDaily = Math.round((totalDailySeconds / 60) / Object.keys(dailyActivity).length);
+                    $('#avgDailyTime').text(avgDaily);
+                }
+
+                // Update weekly bars
+                updateWeeklyBars();
+
+                // Update streak information (multiple elements)
+                $('#currentStreak, #currentStreakLarge').text(state.analytics.streak.current);
+                $('#longestStreak').text(state.analytics.streak.longest);
+
+                // Generate reading heatmap
+                generateReadingHeatmap();
+
+                // Generate consistency calendar
+                generateConsistencyCalendar();
+            }
+
+            // Helper function for relative time
+            function getTimeAgo(date) {
+                const seconds = Math.floor((new Date() - date) / 1000);
+                if (seconds < 60) return 'Just now';
+                const minutes = Math.floor(seconds / 60);
+                if (minutes < 60) return `${minutes}m ago`;
+                const hours = Math.floor(minutes / 60);
+                if (hours < 24) return `${hours}h ago`;
+                const days = Math.floor(hours / 24);
+                return `${days}d ago`;
+            }
+
+            function updateWeeklyBars() {
+                // Get the current week's activity
+                const today = new Date();
+                const dayOfWeek = today.getDay(); // 0 = Sunday, 1 = Monday, ...
+                const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+
+                // Calculate dates for the current week (Monday to Sunday)
+                const dates = [];
+                for (let i = 0; i < 7; i++) {
+                    const date = new Date(today);
+                    const diff = dayOfWeek === 0 ? i - 6 : i + 1 - dayOfWeek; // Adjust to have Monday as first day
+                    date.setDate(today.getDate() + diff);
+                    dates.push(date.toISOString().split('T')[0]);
+                }
+
+                // Get the time spent for each day
+                const timeByDay = [];
+                for (const date of dates) {
+                    timeByDay.push(state.analytics.dailyActivity[date] || 0);
+                }
+
+                // Find max time to normalize bars
+                const maxTime = Math.max(...timeByDay, 60 * 30); // At least 30 minutes for scaling
+
+                // Update bars
+                for (let i = 0; i < 7; i++) {
+                    const dayName = days[(i + 1) % 7]; // Adjust to match our day order (Monday first)
+                    const heightPercentage = Math.round((timeByDay[i] / maxTime) * 100);
+                    $(`#${dayName}Bar`).css('height', `${heightPercentage}%`);
+                }
+            }
+
+            function generateReadingHeatmap() {
+                const heatmap = $('#readingHeatmap');
+                heatmap.empty();
+
+                // Create blocks for all 114 surahs
+                for (let i = 1; i <= 114; i++) {
+                    const isRead = state.analytics.readSurahs.includes(i);
+                    const surah = state.allSurahs.find(s => s.number === i);
+                    const name = surah ? surah.englishName : `Surah ${i}`;
+
+                    const block = $('<div>', {
+                        class: `heatmap-cell ${isRead ? 'read' : ''}`,
+                        'data-bs-toggle': 'tooltip',
+                        'data-bs-placement': 'top',
+                        title: `${i}. ${name}`
+                    });
+
+                    block.on('click', () => {
+                        loadSurah(i);
+                        $('#analyticsModal').modal('hide');
+                    });
+
+                    heatmap.append(block);
+                }
+
+                // Initialize tooltips
+                const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+                tooltipTriggerList.map(el => new bootstrap.Tooltip(el));
+            }
+
+            function generateConsistencyCalendar() {
+                const calendar = $('#consistencyCalendar');
+                calendar.empty();
+
+                // Get last 30 days (but we show 28 for 4 rows of 7)
+                const today = new Date();
+
+                for (let i = 27; i >= 0; i--) {
+                    const date = new Date(today);
+                    date.setDate(today.getDate() - i);
+                    const dateStr = date.toISOString().split('T')[0];
+                    const hasActivity = state.analytics.dailyActivity[dateStr] && state.analytics.dailyActivity[dateStr] > 0;
+                    const dayNum = date.getDate();
+
+                    const dayBlock = $('<div>', {
+                        class: `calendar-day ${hasActivity ? 'active' : ''}`,
+                        text: dayNum,
+                        'data-bs-toggle': 'tooltip',
+                        'data-bs-placement': 'top',
+                        title: date.toLocaleDateString()
+                    });
+
+                    calendar.append(dayBlock);
+                }
+            }
+
+            //#endregion
+
+            //#region NEW FEATURES
+
+            // ========================
+            // BOOKMARKS
+            // ========================
+            function getBookmarks() {
+                return JSON.parse(localStorage.getItem('bookmarks')) || [];
+            }
+
+            function toggleBookmark(surahNumber, ayahNumber) {
+                const verseId = `${surahNumber}:${ayahNumber}`;
+                let bookmarks = getBookmarks();
+
+                if (bookmarks.includes(verseId)) {
+                    bookmarks = bookmarks.filter(b => b !== verseId);
+                } else {
+                    bookmarks.push(verseId);
+                }
+
+                localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+                updateBookmarkIcon(surahNumber, ayahNumber);
+            }
+
+            function isBookmarked(surahNumber, ayahNumber) {
+                const verseId = `${surahNumber}:${ayahNumber}`;
+                return getBookmarks().includes(verseId);
+            }
+
+            function updateBookmarkIcon(surahNumber, ayahNumber) {
+                const btn = $(`.bookmark-btn[data-verse="${surahNumber}:${ayahNumber}"]`);
+                if (isBookmarked(surahNumber, ayahNumber)) {
+                    btn.addClass('bookmarked').find('i').removeClass('far').addClass('fas');
+                } else {
+                    btn.removeClass('bookmarked').find('i').removeClass('fas').addClass('far');
+                }
+            }
+
+            function loadBookmarksModal() {
+                const bookmarks = getBookmarks();
+                const container = $('#bookmarksList');
+
+                if (bookmarks.length === 0) {
+                    container.html(`
+                        <div class="text-center text-muted py-4">
+                            <i class="fas fa-bookmark fa-2x mb-2"></i>
+                            <p>No bookmarks yet</p>
+                            <small>Click the heart icon ❤️ on any verse to bookmark it</small>
+                        </div>
+                    `);
+                    return;
+                }
+
+                let html = '<div class="list-group">';
+                bookmarks.forEach(verseId => {
+                    const [surahNum, ayahNum] = verseId.split(':');
+                    const surah = state.allSurahs ? state.allSurahs.find(s => s.number == surahNum) : null;
+                    const surahName = surah ? surah.englishName : `Surah ${surahNum}`;
+
+                    html += `
+                        <div class="list-group-item d-flex justify-content-between align-items-center" style="background: var(--surface); border-color: var(--border);">
+                            <div>
+                                <strong>${surahName}</strong> - Verse ${ayahNum}
+                                <br><small class="text-muted">${verseId}</small>
+                            </div>
+                            <div>
+                                <button class="btn btn-sm btn-primary me-2 goto-bookmark" data-surah="${surahNum}" data-ayah="${ayahNum}">
+                                    <i class="fas fa-arrow-right"></i> Go
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger remove-bookmark" data-verse="${verseId}">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+                container.html(html);
+
+                // Attach event handlers
+                container.find('.goto-bookmark').on('click', function () {
+                    const surahNum = $(this).data('surah');
+                    const ayahNum = $(this).data('ayah');
+                    loadSurah(surahNum);
+                    $('#bookmarksModal').modal('hide');
+                    // Scroll to ayah after surah loads
+                    $(document).one('surahLoaded', function () {
+                        setTimeout(() => {
+                            $('html, body').animate({
+                                scrollTop: $(`#ayah-${ayahNum}`).offset().top - 100
+                            }, 500);
+                        }, 300);
+                    });
+                });
+
+                container.find('.remove-bookmark').on('click', function () {
+                    const verseId = $(this).data('verse');
+                    const [surahNum, ayahNum] = verseId.split(':').map(Number);
+                    toggleBookmark(surahNum, ayahNum);
+                    loadBookmarksModal(); // Refresh list
+                });
+            }
+
+            // ========================
+            // NOTES
+            // ========================
+            function getNotes() {
+                return JSON.parse(localStorage.getItem('ayahNotes')) || {};
+            }
+
+            function saveNote(surahNumber, ayahNumber, noteText) {
+                const verseId = `${surahNumber}:${ayahNumber}`;
+                const notes = getNotes();
+
+                if (noteText.trim()) {
+                    notes[verseId] = noteText;
+                } else {
+                    delete notes[verseId];
+                }
+
+                localStorage.setItem('ayahNotes', JSON.stringify(notes));
+                updateNoteIcon(surahNumber, ayahNumber);
+            }
+
+            function getNote(surahNumber, ayahNumber) {
+                return getNotes()[`${surahNumber}:${ayahNumber}`] || '';
+            }
+
+            function updateNoteIcon(surahNumber, ayahNumber) {
+                const btn = $(`.note-btn[data-verse="${surahNumber}:${ayahNumber}"]`);
+                if (getNote(surahNumber, ayahNumber)) {
+                    btn.addClass('has-note');
+                } else {
+                    btn.removeClass('has-note');
+                }
+            }
+
+            function showNoteModal(surahNumber, ayahNumber) {
+                const currentNote = getNote(surahNumber, ayahNumber);
+                const surahName = state.currentSurah ? state.currentSurah.englishName : 'Surah';
+
+                const modalHtml = `
+                    <div class="modal fade" id="noteModal" tabindex="-1">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content" style="background: var(--surface);">
+                                <div class="modal-header border-0">
+                                    <h5 class="modal-title">Note - ${surahName} ${ayahNumber}</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <textarea id="noteTextarea" class="form-control notes-textarea" placeholder="Add your note or reflection...">${currentNote}</textarea>
+                                </div>
+                                <div class="modal-footer border-0">
+                                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                                    <button type="button" class="btn btn-primary" id="saveNoteBtn">Save Note</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                $('#noteModal').remove();
+                $('body').append(modalHtml);
+
+                const modal = new bootstrap.Modal(document.getElementById('noteModal'));
+                modal.show();
+
+                $('#saveNoteBtn').on('click', function () {
+                    saveNote(surahNumber, ayahNumber, $('#noteTextarea').val());
+                    modal.hide();
+                });
+            }
+
+            // ========================
+            // FONT SIZE CONTROL
+            // ========================
+            function initFontControls() {
+                const savedArabicSize = localStorage.getItem('arabicFontSize') || 28;
+                const savedTranslationSize = localStorage.getItem('translationFontSize') || 16;
+
+                $('#arabicFontSize').val(savedArabicSize);
+                $('#translationFontSize').val(savedTranslationSize);
+                $('#arabicSizeLabel').text(savedArabicSize);
+                $('#translationSizeLabel').text(savedTranslationSize);
+
+                applyFontSizes(savedArabicSize, savedTranslationSize);
+
+                $('#arabicFontSize').on('input', function () {
+                    const size = $(this).val();
+                    $('#arabicSizeLabel').text(size);
+                    localStorage.setItem('arabicFontSize', size);
+                    applyFontSizes(size, $('#translationFontSize').val());
+                });
+
+                $('#translationFontSize').on('input', function () {
+                    const size = $(this).val();
+                    $('#translationSizeLabel').text(size);
+                    localStorage.setItem('translationFontSize', size);
+                    applyFontSizes($('#arabicFontSize').val(), size);
+                });
+            }
+
+            function applyFontSizes(arabicSize, translationSize) {
+                document.documentElement.style.setProperty('--arabic-font-size', arabicSize + 'px');
+                document.documentElement.style.setProperty('--translation-font-size', translationSize + 'px');
+                $('.arabic-text').css('font-size', arabicSize + 'px');
+                $('.translation-text').css('font-size', translationSize + 'px');
+            }
+
+            // ========================
+            // KEYBOARD SHORTCUTS
+            // ========================
+            function initKeyboardShortcuts() {
+                $(document).on('keydown', function (e) {
+                    // Skip if typing in input
+                    if ($(e.target).is('input, textarea, select')) return;
+
+                    switch (e.key) {
+                        case ' ':
+                            e.preventDefault();
+                            togglePlayPause();
+                            break;
+                        case 'ArrowLeft':
+                            e.preventDefault();
+                            playPreviousAyah();
+                            break;
+                        case 'ArrowRight':
+                            e.preventDefault();
+                            playNextAyah();
+                            break;
+                        case 'Escape':
+                            $('.modal').modal('hide');
+                            toggleMobileSidebar(false);
+                            break;
+                    }
+                });
+            }
+
+            // ========================
+            // SLEEP TIMER
+            // ========================
+            let sleepTimer = null;
+            let sleepTimerRemaining = 0;
+
+            function startSleepTimer(minutes) {
+                clearSleepTimer();
+                if (minutes <= 0) return;
+
+                sleepTimerRemaining = minutes * 60;
+                updateSleepTimerDisplay();
+
+                sleepTimer = setInterval(() => {
+                    sleepTimerRemaining--;
+                    updateSleepTimerDisplay();
+
+                    if (sleepTimerRemaining <= 0) {
+                        clearSleepTimer();
+                        if (state.isPlaying) {
+                            togglePlayPause();
+                        }
+                    }
+                }, 1000);
+            }
+
+            function clearSleepTimer() {
+                if (sleepTimer) {
+                    clearInterval(sleepTimer);
+                    sleepTimer = null;
+                }
+                sleepTimerRemaining = 0;
+                $('#sleepTimerBadge').hide();
+                // Reset Icon
+                $('.sleep-timer-dropdown button i#sleepTimerIcon').removeClass('text-danger fa-spin');
+
+                // Reset active dropdown item to "Off"
+                $('.sleep-timer-dropdown .dropdown-item').removeClass('active');
+                $('.sleep-timer-dropdown .dropdown-item[data-value="0"]').addClass('active');
+            }
+
+            function updateSleepTimerDisplay() {
+                if (sleepTimerRemaining > 0) {
+                    const mins = Math.floor(sleepTimerRemaining / 60);
+                    const secs = sleepTimerRemaining % 60;
+                    $('#sleepTimerBadge').text(`${mins}:${secs.toString().padStart(2, '0')}`).show();
+
+                    // Animate Icon if timer is running
+                    $('.sleep-timer-dropdown button i#sleepTimerIcon').addClass('text-danger');
+                } else {
+                    $('#sleepTimerBadge').hide();
+                    $('.sleep-timer-dropdown button i#sleepTimerIcon').removeClass('text-danger');
+                }
+            }
+
+            // ========================
+            // SALAH TIMES
+            // ========================
+
+            // Countries and major cities data
+            const locationData = {
+                "Bangladesh": { cities: ["Dhaka", "Chittagong", "Khulna", "Sylhet", "Rajshahi", "Comilla", "Rangpur", "Gazipur"], timezone: "UTC+6:00" },
+                "Saudi Arabia": { cities: ["Mecca", "Medina", "Riyadh", "Jeddah", "Dammam", "Khobar", "Taif"], timezone: "UTC+3:00" },
+                "United Arab Emirates": { cities: ["Dubai", "Abu Dhabi", "Sharjah", "Ajman", "Fujairah"], timezone: "UTC+4:00" },
+                "Pakistan": { cities: ["Karachi", "Lahore", "Islamabad", "Rawalpindi", "Faisalabad", "Peshawar", "Multan"], timezone: "UTC+5:00" },
+                "India": { cities: ["Mumbai", "Delhi", "Kolkata", "Chennai", "Hyderabad", "Lucknow", "Bangalore"], timezone: "UTC+5:30" },
+                "Indonesia": { cities: ["Jakarta", "Surabaya", "Bandung", "Medan", "Semarang", "Yogyakarta"], timezone: "UTC+7:00" },
+                "Malaysia": { cities: ["Kuala Lumpur", "George Town", "Johor Bahru", "Malacca", "Ipoh"], timezone: "UTC+8:00" },
+                "Turkey": { cities: ["Istanbul", "Ankara", "Izmir", "Bursa", "Antalya", "Konya"], timezone: "UTC+3:00" },
+                "Egypt": { cities: ["Cairo", "Alexandria", "Giza", "Luxor", "Aswan", "Sharm El Sheikh"], timezone: "UTC+2:00" },
+                "United Kingdom": { cities: ["London", "Birmingham", "Manchester", "Leeds", "Bradford", "Glasgow"], timezone: "UTC+0:00" },
+                "United States": { cities: ["New York", "Los Angeles", "Chicago", "Houston", "Phoenix", "Detroit", "Dallas"], timezone: "UTC-5:00" },
+                "Canada": { cities: ["Toronto", "Montreal", "Vancouver", "Calgary", "Ottawa", "Edmonton"], timezone: "UTC-5:00" },
+                "Australia": { cities: ["Sydney", "Melbourne", "Brisbane", "Perth", "Adelaide"], timezone: "UTC+10:00" },
+                "Qatar": { cities: ["Doha", "Al Wakrah", "Al Khor", "Al Rayyan"], timezone: "UTC+3:00" },
+                "Kuwait": { cities: ["Kuwait City", "Hawalli", "Salmiya", "Farwaniya"], timezone: "UTC+3:00" },
+                "Bahrain": { cities: ["Manama", "Riffa", "Muharraq"], timezone: "UTC+3:00" },
+                "Oman": { cities: ["Muscat", "Salalah", "Sohar", "Nizwa"], timezone: "UTC+4:00" },
+                "Jordan": { cities: ["Amman", "Zarqa", "Irbid", "Aqaba"], timezone: "UTC+3:00" },
+                "Morocco": { cities: ["Casablanca", "Rabat", "Fez", "Marrakech", "Tangier"], timezone: "UTC+1:00" },
+                "Nigeria": { cities: ["Lagos", "Kano", "Ibadan", "Abuja", "Kaduna"], timezone: "UTC+1:00" },
+                "South Africa": { cities: ["Johannesburg", "Cape Town", "Durban", "Pretoria"], timezone: "UTC+2:00" },
+                "France": { cities: ["Paris", "Marseille", "Lyon", "Nice", "Strasbourg"], timezone: "UTC+1:00" },
+                "Germany": { cities: ["Berlin", "Munich", "Frankfurt", "Hamburg", "Cologne"], timezone: "UTC+1:00" },
+                "Singapore": { cities: ["Singapore"], timezone: "UTC+8:00" },
+                "Brunei": { cities: ["Bandar Seri Begawan", "Kuala Belait", "Seria"], timezone: "UTC+8:00" }
+            };
+
+            function initLocationSelect2() {
+                // Populate countries
+                const countrySelect = $('#countrySelect');
+                countrySelect.empty().append('<option value="">Select Country...</option>');
+
+                Object.keys(locationData).sort().forEach(country => {
+                    countrySelect.append(`<option value="${country}">${country}</option>`);
+                });
+
+                // Initialize Select2 on country
+                countrySelect.select2({
+                    theme: 'bootstrap-5',
+                    placeholder: 'Search for a country...',
+                    allowClear: true,
+                    dropdownParent: $('#locationModal')
+                });
+
+                // Initialize Select2 on city (disabled initially)
+                $('#citySelect').select2({
+                    theme: 'bootstrap-5',
+                    placeholder: 'Select Country first...',
+                    allowClear: true,
+                    dropdownParent: $('#locationModal')
+                });
+
+                // Country change handler
+                countrySelect.on('change', function () {
+                    const country = $(this).val();
+                    const citySelect = $('#citySelect');
+
+                    citySelect.empty().append('<option value="">Select City...</option>');
+
+                    if (country && locationData[country]) {
+                        locationData[country].cities.forEach(city => {
+                            citySelect.append(`<option value="${city}">${city}</option>`);
+                        });
+                        citySelect.prop('disabled', false).trigger('change');
+
+                        // Show timezone
+                        $('#timezoneDisplay').text(locationData[country].timezone);
+                        $('#timezoneInfo').show();
+                    } else {
+                        citySelect.prop('disabled', true);
+                        $('#timezoneInfo').hide();
+                    }
+
+                    updateSaveButton();
+                });
+
+                // City change handler
+                $('#citySelect').on('change', function () {
+                    updateSaveButton();
+                });
+
+                // Load saved location
+                const saved = getSavedLocation();
+                if (saved) {
+                    countrySelect.val(saved.country).trigger('change');
+                    setTimeout(() => {
+                        $('#citySelect').val(saved.city).trigger('change');
+                    }, 100);
+                }
+            }
+
+            function updateSaveButton() {
+                const country = $('#countrySelect').val();
+                const city = $('#citySelect').val();
+                $('#saveLocationBtn').prop('disabled', !(country && city));
+            }
+
+            function getSavedLocation() {
+                return JSON.parse(localStorage.getItem('salahLocation')) || null;
+            }
+
+            function saveLocation(city, country, timezone) {
+                localStorage.setItem('salahLocation', JSON.stringify({ city, country, timezone }));
+            }
+
+            async function fetchPrayerTimes(city, country) {
+                try {
+                    const response = await fetch(`https://api.aladhan.com/v1/timingsByCity?city=${encodeURIComponent(city)}&country=${encodeURIComponent(country)}&method=2`);
+                    const data = await response.json();
+                    if (data.code === 200) {
+                        return data.data.timings;
+                    }
+                } catch (error) {
+                    console.error('Error fetching prayer times:', error);
+                }
+                return null;
+            }
+
+            async function loadPrayerTimes() {
+                const location = getSavedLocation();
+                if (!location) return;
+
+                const timings = await fetchPrayerTimes(location.city, location.country);
+                if (timings) {
+                    displayPrayerTimes(timings, location);
+                }
+            }
+
+            function displayPrayerTimes(timings, location) {
+                const prayers = ['Fajr', 'Sunrise', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
+                const now = new Date();
+                const currentTime = now.getHours() * 60 + now.getMinutes();
+
+                let nextPrayer = null;
+                let nextPrayerTime = null;
+
+                prayers.forEach(prayer => {
+                    const [h, m] = timings[prayer].split(':').map(Number);
+                    const prayerMins = h * 60 + m;
+                    if (!nextPrayer && prayerMins > currentTime) {
+                        nextPrayer = prayer;
+                        nextPrayerTime = timings[prayer];
+                    }
+                });
+
+                if (!nextPrayer) {
+                    nextPrayer = 'Fajr';
+                    nextPrayerTime = timings['Fajr'];
+                }
+
+                // Update navbar
+                $('#nextPrayerName').text(nextPrayer);
+                $('#nextPrayerTime').text(nextPrayerTime).show();
+
+                // Update modal grid
+                let gridHtml = '';
+                prayers.forEach(prayer => {
+                    const isActive = prayer === nextPrayer;
+                    gridHtml += `
+                        <div class="salah-time-item ${isActive ? 'active' : ''}">
+                            <div class="salah-time-name">${prayer}</div>
+                            <div class="salah-time-value">${timings[prayer]}</div>
+                        </div>
+                    `;
+                });
+                $('#salahTimesGrid').html(gridHtml);
+                $('#currentLocation').text(`${location.city}, ${location.country}`);
+            }
+
+            function initSalahTimes() {
+                loadPrayerTimes();
+
+                // Refresh every 5 minutes
+                setInterval(loadPrayerTimes, 5 * 60 * 1000);
+            }
+
+            // ========================
+            // SHARE VERSE
+            // ========================
+            function shareVerse(surahNumber, ayahNumber, arabicText, translation) {
+                const surahName = state.currentSurah ? state.currentSurah.englishName : `Surah ${surahNumber}`;
+                const text = `${arabicText}\n\n"${translation}"\n\n- ${surahName}, Verse ${ayahNumber}`;
+
+                if (navigator.share) {
+                    navigator.share({
+                        title: `Quran - ${surahName}:${ayahNumber}`,
+                        text: text
+                    });
+                } else {
+                    navigator.clipboard.writeText(text).then(() => {
+                        alert('Verse copied to clipboard!');
+                    });
+                }
+            }
+
+            // ========================
+            // READING GOALS
+            // ========================
+            function getReadingGoal() {
+                return parseInt(localStorage.getItem('dailyReadingGoal')) || 10;
+            }
+
+            function setReadingGoal(verses) {
+                localStorage.setItem('dailyReadingGoal', verses);
+            }
+
+            function getTodayVersesRead() {
+                const today = new Date().toISOString().split('T')[0];
+                const todayVerses = state.analytics.readVerses.filter(v => {
+                    // This is a simplification - would need timestamp tracking for accuracy
+                    return true;
+                });
+                return state.analytics.readVerses.length;
+            }
+
+            // ========================
+            // INIT NEW FEATURES
+            // ========================
+            function initNewFeatures() {
+                initFontControls();
+                initKeyboardShortcuts();
+                initSalahTimes();
+            }
+
+            //#endregion
+
+
+            function loadPreferences() {
+                if (localStorage.getItem('darkMode') === 'true') {
+                    toggleDarkMode();
+                }
+
+                $('#reciterSelect').val(state.reciter);
+                $('#translationSelect').val(state.translation);
+            }
+
+            function initSplashScreen() {
+                setTimeout(() => {
+                    $('#splash').css('opacity', '0');
+                    setTimeout(() => {
+                        $('#splash').css('display', 'none');
+                    }, 500);
+                }, 2000);
+            }
+
+            // ========================
+            // DATA FETCHING
+            // ========================
+            function fetchSurahs() {
+                $.ajax({
+                    url: 'https://api.alquran.cloud/v1/surah',
+                    method: 'GET',
+                    success: function (response) {
+                        state.allSurahs = response.data;
+                        renderSurahList(state.allSurahs);
+                        // Trigger event after surah list is loaded
+                        $(document).trigger('surahListLoaded');
+                        loadSurah(1);
+                        $('.surah-list-item[data-surah-number="1"]').addClass('active');
+                    },
+                    error: function (error) {
+                        console.error('Error fetching surahs:', error);
+                        $('#surahContent').html('<div class="alert alert-danger">Failed to load surahs. Please try again later.</div>');
+                    }
+                });
+            }
+
+            function fetchAvailableEditions() {
+                $.ajax({
+                    url: 'https://api.alquran.cloud/v1/edition',
+                    method: 'GET',
+                    success: function (response) {
+                        const editions = response.data;
+
+                        // Group translations by language
+                        const translations = editions.filter(edition =>
+                            edition.format === 'text' && edition.type === 'translation');
+
+                        // Get any transliterations
+                        const transliterations = editions.filter(edition =>
+                            edition.format === 'text' && edition.type === 'transliteration');
+
+                        // Add transliterations to available options
+                        transliterations.forEach(item => {
+                            state.availableTransliterations[item.identifier] = item.englishName;
+                        });
+
+                        populateTranslationSelect(translations);
+                    },
+                    error: function (error) {
+                        console.error('Error fetching editions:', error);
+                    }
+                });
+            }
+
+            function loadSurah(surahNumber) {
+                $('#loading').show();
+
+                // Prepare editions string based on options
+                let editionsStr = `${state.reciter},${state.translation}`;
+                if (state.transliteration) {
+                    editionsStr += `,${state.transliteration}`;
+                }
+
+                $.ajax({
+                    url: `https://api.alquran.cloud/v1/surah/${surahNumber}/editions/${editionsStr}`,
+                    method: 'GET',
+                    success: function (response) {
+                        const arabicData = response.data.find(d => d.edition.identifier === state.reciter);
+                        const translationData = response.data.find(d => d.edition.identifier === state.translation);
+                        const transliterationData = state.transliteration ?
+                            response.data.find(d => d.edition.identifier === state.transliteration) : null;
+
+                        state.currentSurah = arabicData;
+                        state.currentAyahs = arabicData.ayahs;
+                        state.currentAyahIndex = 0;
+
+                        // Save last position
+                        localStorage.setItem('lastSurah', surahNumber);
+                        // Trigger event when surah is loaded
+                        $(document).trigger('surahLoaded');
+                        // Update UI
+                        renderSurah(arabicData, translationData, transliterationData);
+
+                        // Show audio player
+                        $('#audioPlayer').show();
+
+                        // Reset audio
+                        resetAudioPlayer();
+
+                        // Update page title
+                        document.title = `${arabicData.englishName} - Al Quran`;
+
+                        // Scroll to top
+                        window.scrollTo(0, 0);
+
+                        $('#loading').hide();
+                    },
+                    error: function (error) {
+                        console.error('Error loading surah:', error);
+                        $('#surahContent').html('<div class="alert alert-danger">Failed to load surah. Please try again later.</div>');
+                        $('#loading').hide();
+                    }
+                });
+            }
+
+            // ========================
+            // RENDERING FUNCTIONS
+            // ========================
+            function renderSurahList(surahs) {
+                const surahList = $('#surahList');
+                surahList.empty();
+
+                surahs.forEach(surah => {
+                    const item = $('<div>', {
+                        class: 'surah-list-item',
+                        'data-surah-number': surah.number,
+                        html: `
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="fw-bold">${surah.number}. ${surah.englishName}</span>
+                            <small class="d-block text-muted">${surah.englishNameTranslation}</small>
+                        </div>
+                        <div dir="rtl">${surah.name}</div>
+                    </div>
+                `
+                    });
+
+                    surahList.append(item);
+                });
+            }
+
+            function populateTranslationSelect(translations) {
+                const translationSelect = $('#translationSelect');
+                translationSelect.empty();
+
+                // Add translations grouped by language
+                const languageGroups = {};
+                translations.forEach(item => {
+                    if (!languageGroups[item.language]) {
+                        languageGroups[item.language] = [];
+                    }
+                    languageGroups[item.language].push(item);
+                });
+
+                // Add options by language groups
+                Object.keys(languageGroups).sort().forEach(lang => {
+                    const group = $('<optgroup>', {
+                        label: getLangName(lang)
+                    });
+
+                    languageGroups[lang].forEach(item => {
+                        group.append($('<option>', {
+                            value: item.identifier,
+                            text: item.englishName,
+                            selected: item.identifier === state.translation
+                        }));
+                    });
+
+                    translationSelect.append(group);
+                });
+            }
+
+            function renderSurah(arabicData, translationData, transliterationData) {
+                const surahContent = $('#surahContent');
+                surahContent.empty();
+
+                // Add surah header
+                renderSurahHeader(surahContent, arabicData);
+
+                // Add Bismillah except for Surah At-Tawbah (9)
+                if (arabicData.number !== 9) {
+                    const bismillah = $('<div>', {
+                        class: 'bismillah arabic-text',
+                        html: 'بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ'
+                    });
+
+                    surahContent.append(bismillah);
+                }
+
+                // Add ayahs
+                renderAyahs(surahContent, arabicData, translationData, transliterationData);
+
+                // Update audio player
+                updateAudioPlayer(0);
+            }
+
+            function renderSurahHeader(container, surahData) {
+                const surahHeader = $('<div>', {
+                    class: 'surah-info mb-4',
+                    html: `
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h2 class="mb-0">${surahData.number}. ${surahData.englishName}</h2>
+                        <h4 class="mb-0">${surahData.englishNameTranslation}</h4>
+                        <div class="mt-2">
+                            <span class="badge bg-light text-dark me-2">Ayahs: ${surahData.numberOfAyahs}</span>
+                            <span class="badge bg-light text-dark">Type: ${surahData.revelationType}</span>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                        <h3 class="mb-0" dir="rtl">${surahData.name}</h3>
+                    </div>
+                </div>
+            `
+                });
+
+                container.append(surahHeader);
+            }
+
+            function renderAyahs(container, arabicData, translationData, transliterationData) {
+                const surahNumber = arabicData.number;
+
+                arabicData.ayahs.forEach((ayah, index) => {
+                    const translationAyah = translationData.ayahs[index];
+                    const transliterationAyah = transliterationData ? transliterationData.ayahs[index] : null;
+                    const ayahNumber = ayah.numberInSurah;
+                    const verseId = `${surahNumber}:${ayahNumber}`;
+                    const isBookmarked = getBookmarks().includes(verseId);
+                    const hasNote = getNote(surahNumber, ayahNumber);
+
+                    const ayahContainer = $('<div>', {
+                        class: 'ayah-container',
+                        'data-ayah-index': index,
+                        'data-surah': surahNumber,
+                        'data-ayah': ayahNumber,
+                        id: `ayah-${ayahNumber}`
+                    });
+
+                    let ayahHtml = `
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="ayah-number">${ayahNumber}</span>
+                            <button class="btn btn-sm btn-outline-success play-ayah-btn" data-ayah-index="${index}">
+                                <i class="fas fa-play"></i>
+                            </button>
+                        </div>
+                        <div class="arabic-text mb-3 ${$('#showArabic').prop('checked') ? '' : 'd-none'}">${ayah.text}</div>
+                        <div class="translation-text ${$('#showTranslation').prop('checked') ? '' : 'd-none'}">${translationAyah.text}</div>
+                    `;
+
+                    if (transliterationAyah && $('#showTransliteration').prop('checked')) {
+                        ayahHtml += `<div class="transliteration-text">${transliterationAyah.text}</div>`;
+                    }
+
+                    // Add action buttons
+                    ayahHtml += `
+                        <div class="ayah-actions">
+                            <button class="ayah-action-btn bookmark-btn ${isBookmarked ? 'bookmarked' : ''}" 
+                                    data-verse="${verseId}" title="Bookmark">
+                                <i class="${isBookmarked ? 'fas' : 'far'} fa-heart"></i>
+                            </button>
+                            <button class="ayah-action-btn note-btn ${hasNote ? 'has-note' : ''}" 
+                                    data-verse="${verseId}" title="Add Note">
+                                <i class="fas fa-sticky-note"></i>
+                            </button>
+                            <button class="ayah-action-btn share-btn" 
+                                    data-verse="${verseId}" 
+                                    data-arabic="${encodeURIComponent(ayah.text)}"
+                                    data-translation="${encodeURIComponent(translationAyah.text)}" title="Share">
+                                <i class="fas fa-share-alt"></i>
+                            </button>
+                        </div>
+                    `;
+
+                    ayahContainer.html(ayahHtml);
+                    container.append(ayahContainer);
+                });
+
+                // Attach event handlers
+                container.find('.bookmark-btn').on('click', function () {
+                    const [surah, ayah] = $(this).data('verse').split(':').map(Number);
+                    toggleBookmark(surah, ayah);
+                });
+
+                container.find('.note-btn').on('click', function () {
+                    const [surah, ayah] = $(this).data('verse').split(':').map(Number);
+                    showNoteModal(surah, ayah);
+                });
+
+                container.find('.share-btn').on('click', function () {
+                    const [surah, ayah] = $(this).data('verse').split(':').map(Number);
+                    const arabic = decodeURIComponent($(this).data('arabic'));
+                    const translation = decodeURIComponent($(this).data('translation'));
+                    shareVerse(surah, ayah, arabic, translation);
+                });
+            }
+
+            // ========================
+            // AUDIO PLAYER FUNCTIONS
+            // ========================
+            function updateAudioPlayer(index) {
+                if (!state.currentAyahs || state.currentAyahs.length === 0) return;
+
+                state.currentAyahIndex = index;
+                const ayah = state.currentAyahs[state.currentAyahIndex];
+                // Save last ayah position
+                localStorage.setItem('lastAyah', ayah.numberInSurah);
+
+                state.audioElement.src = ayah.audio;
+                state.audioElement.load();
+                // Track this verse for analytics
+                trackVerse(state.currentSurah.number, ayah.numberInSurah);
+
+                $('#currentAyahInfo').text(`Surah ${state.currentSurah.englishName} - Ayah ${ayah.numberInSurah}`);
+                $('#audioProgress').val(0);
+                $('#currentTime').text('00:00 / 00:00');
+
+                // Update UI
+                $('.ayah-container').removeClass('active');
+                $(`#ayah-${ayah.numberInSurah}`).addClass('active');
+
+                // Scroll to ayah
+                $('html, body').animate({
+                    scrollTop: $(`#ayah-${ayah.numberInSurah}`).offset().top - 100
+                }, 500);
+            }
+
+            function resetAudioPlayer() {
+                state.audioElement.pause();
+                state.audioElement.src = '';
+                $('#playPause i').removeClass('fa-pause').addClass('fa-play');
+                state.isPlaying = false;
+            }
+
+            function togglePlayPause() {
+                if (state.isPlaying) {
+                    state.audioElement.pause();
+                    $('#playPause i').removeClass('fa-pause').addClass('fa-play');
+                } else {
+                    state.audioElement.play();
+                    $('#playPause i').removeClass('fa-play').addClass('fa-pause');
+                }
+                state.isPlaying = !state.isPlaying;
+            }
+
+            function playPreviousAyah() {
+                if (state.currentAyahIndex > 0) {
+                    updateAudioPlayer(state.currentAyahIndex - 1);
+
+                    if (state.isPlaying) {
+                        state.audioElement.play();
+                    }
+                }
+            }
+
+            function playNextAyah() {
+                if (state.currentAyahIndex < state.currentAyahs.length - 1) {
+                    updateAudioPlayer(state.currentAyahIndex + 1);
+
+                    if (state.isPlaying) {
+                        state.audioElement.play();
+                    }
+                }
+            }
+
+            function repeatCurrentAyah() {
+                state.audioElement.currentTime = 0;
+
+                if (state.isPlaying) {
+                    state.audioElement.play();
+                }
+            }
+
+            function updateProgressBar() {
+                const duration = state.audioElement.duration;
+                const currentTime = state.audioElement.currentTime;
+
+                if (!isNaN(duration)) {
+                    // Update progress bar
+                    const percentage = (currentTime / duration) * 100;
+                    $('#audioProgress').val(percentage);
+
+                    // Update time display
+                    const currentMinutes = Math.floor(currentTime / 60);
+                    const currentSeconds = Math.floor(currentTime % 60);
+                    const totalMinutes = Math.floor(duration / 60);
+                    const totalSeconds = Math.floor(duration % 60);
+
+                    $('#currentTime').text(
+                        `${String(currentMinutes).padStart(2, '0')}:${String(currentSeconds).padStart(2, '0')} / ${String(totalMinutes).padStart(2, '0')}:${String(totalSeconds).padStart(2, '0')}`
+                    );
+                }
+            }
+
+            function handleAudioEnded() {
+                // Auto-play next ayah if available
+                if (state.currentAyahIndex < state.currentAyahs.length - 1) {
+                    updateAudioPlayer(state.currentAyahIndex + 1);
+                    state.audioElement.play();
+                } else {
+                    // Reset play button at end of surah
+                    $('#playPause i').removeClass('fa-pause').addClass('fa-play');
+                    state.isPlaying = false;
+                }
+            }
+
+            function setProgressBarPosition(percentage) {
+                const duration = state.audioElement.duration;
+
+                if (!isNaN(duration)) {
+                    state.audioElement.currentTime = (percentage / 100) * duration;
+                }
+            }
+
+            // ========================
+            // UI HELPER FUNCTIONS
+            // ========================
+            function toggleDarkMode() {
+                state.isDarkMode = !state.isDarkMode;
+
+                if (state.isDarkMode) {
+                    document.body.classList.add('dark-mode');
+                    $('#toggleDarkMode').html('<i class="fas fa-sun"></i> Light Mode');
+                } else {
+                    document.body.classList.remove('dark-mode');
+                    $('#toggleDarkMode').html('<i class="fas fa-moon"></i> Dark Mode');
+                }
+
+                localStorage.setItem('darkMode', state.isDarkMode);
+            }
+
+            function filterSurahList(searchTerm) {
+                $('.surah-list-item').each(function () {
+                    const text = $(this).text().toLowerCase();
+                    $(this).toggle(text.includes(searchTerm));
+                });
+            }
+
+            function toggleMobileSidebar(show) {
+                if (show) {
+                    $('.sidebar').addClass('show');
+                    $('.sidebar-overlay').addClass('show');
+                } else {
+                    $('.sidebar').removeClass('show');
+                    $('.sidebar-overlay').removeClass('show');
+                }
+            }
+
+            // Helper function to get language name
+            function getLangName(code) {
+                const languages = {
+                    'en': 'English',
+                    'ar': 'Arabic',
+                    'bn': 'Bengali',
+                    'ur': 'Urdu',
+                    'hi': 'Hindi',
+                    'fr': 'French',
+                    'es': 'Spanish',
+                    'de': 'German',
+                    'ru': 'Russian',
+                    'zh': 'Chinese',
+                    'tr': 'Turkish',
+                    'id': 'Indonesian',
+                    'ms': 'Malay',
+                    'th': 'Thai',
+                    'fa': 'Persian',
+                    'it': 'Italian',
+                    'nl': 'Dutch',
+                    'pt': 'Portuguese',
+                    'ja': 'Japanese',
+                    'ko': 'Korean'
+                };
+
+                return languages[code] || code.toUpperCase();
+            }
+
+            // ========================
+            // EVENT LISTENERS
+            // ========================
+            function attachEventListeners() {
+                // Surah search
+                $('#surahSearch').on('input', function () {
+                    filterSurahList($(this).val().toLowerCase());
+                });
+
+                // Surah selection
+                $(document).on('click', '.surah-list-item', function () {
+                    const surahNumber = $(this).data('surah-number');
+
+                    // Update active state
+                    $('.surah-list-item').removeClass('active');
+                    $(this).addClass('active');
+
+                    // Hide mobile sidebar
+                    toggleMobileSidebar(false);
+
+                    loadSurah(surahNumber);
+                });
+
+                // mobile sidebar toggle 
+                $('#mobileSidebarToggle').on('click', function () {
+                    toggleMobileSidebar(true);
+                });
+
+                $('#sidebarOverlay').on('click', function () {
+                    toggleMobileSidebar(false);
+                });
+
+                // Language selectors
+                $('#reciterSelect').on('change', function () {
+                    state.reciter = $(this).val();
+                    localStorage.setItem('reciter', state.reciter);
+
+                    if (state.currentSurah) {
+                        loadSurah(state.currentSurah.number);
+                    }
+                });
+
+                $('#translationSelect').on('change', function () {
+                    state.translation = $(this).val();
+                    localStorage.setItem('translation', state.translation);
+
+                    if (state.currentSurah) {
+                        loadSurah(state.currentSurah.number);
+                    }
+                });
+
+                // Toggle display options
+                $('#showArabic, #showTranslation, #showTransliteration').on('change', function () {
+                    const id = $(this).attr('id');
+                    const isChecked = $(this).prop('checked');
+
+                    if (id === 'showArabic') {
+                        $('.arabic-text').toggleClass('d-none', !isChecked);
+                    } else if (id === 'showTranslation') {
+                        $('.translation-text').toggleClass('d-none', !isChecked);
+                    } else if (id === 'showTransliteration') {
+                        $('.transliteration-text').toggleClass('d-none', !isChecked);
+
+                        // If transliteration is enabled but not loaded, reload the surah
+                        if (isChecked && !state.transliteration && state.currentSurah) {
+                            // Set a default transliteration if available
+                            state.transliteration = 'en.transliteration';
+                            loadSurah(state.currentSurah.number);
+                        }
+                    }
+                });
+
+                // Audio player controls
+                $('#playPause').on('click', togglePlayPause);
+                $('#prevAyah').on('click', playPreviousAyah);
+                $('#nextAyah').on('click', playNextAyah);
+                $('#repeatAyah').on('click', repeatCurrentAyah);
+
+                // Play specific ayah
+                $(document).on('click', '.play-ayah-btn', function () {
+                    const index = $(this).data('ayah-index');
+                    updateAudioPlayer(index);
+
+                    state.audioElement.play();
+                    $('#playPause i').removeClass('fa-play').addClass('fa-pause');
+                    state.isPlaying = true;
+                });
+
+                // Audio element events
+                state.audioElement.addEventListener('timeupdate', updateProgressBar);
+                state.audioElement.addEventListener('ended', handleAudioEnded);
+
+                // Progress bar interaction
+                $('#audioProgress').on('input', function () {
+                    setProgressBarPosition($(this).val());
+                });
+
+                // Playback speed
+                $('#playbackSpeed').on('change', function () {
+                    state.audioElement.playbackRate = parseFloat($(this).val());
+                });
+
+                // Toggle dark mode
+                $('#toggleDarkMode').on('click', function (e) {
+                    e.preventDefault();
+                    toggleDarkMode();
+                });
+
+                // Scroll to top button
+                $(window).on('scroll', function () {
+                    if ($(this).scrollTop() > 300) {
+                        $('#scrollTopBtn').addClass('visible');
+                    } else {
+                        $('#scrollTopBtn').removeClass('visible');
+                    }
+                });
+
+                $('#scrollTopBtn').on('click', function () {
+                    $('html, body').animate({ scrollTop: 0 }, 500);
+                });
+
+                // Analytics modal events
+                $('#analyticsModal').on('show.bs.modal', function () {
+                    updateAnalyticsPanels();
+                });
+            }
+
+            // Initialize the application
+            init();
+        });
+    </script>
+</body>
+
+</html>
