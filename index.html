@@ -51,6 +51,46 @@
             --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.4);
         }
 
+        /* Ramadan Banner */
+        .ramadan-banner {
+            background: linear-gradient(135deg, #1e40af 0%, #7c3aed 50%, #db2777 100%);
+            color: white;
+            padding: 0.75rem;
+            text-align: center;
+            font-weight: 500;
+            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+            position: relative;
+            overflow: hidden;
+            z-index: 900;
+        }
+
+        .ramadan-banner::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('https://www.transparenttextures.com/patterns/arabesque.png');
+            opacity: 0.1;
+        }
+
+        .countdown-item {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 2px 8px;
+            border-radius: 6px;
+            margin: 0 4px;
+            font-weight: 700;
+            min-width: 40px;
+        }
+
+        .countdown-label {
+            font-size: 0.8rem;
+            opacity: 0.9;
+            margin-right: 4px;
+        }
+
         * {
             box-sizing: border-box;
         }
@@ -145,6 +185,50 @@
             background-size: 4px 100%;
             background-repeat: no-repeat;
             background-color: rgba(13, 148, 136, 0.08);
+        }
+
+        /* Cursor pointer util */
+        .cursor-pointer {
+            cursor: pointer;
+        }
+
+        .hadith-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            position: relative;
+        }
+
+        .hadith-card::before {
+            content: '\f518';
+            /* Scroll icon */
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: 3rem;
+            opacity: 0.05;
+        }
+
+        /* Fix: Ensure inactive sidebar tab-panes are hidden */
+        #sidebarTabContent .tab-pane:not(.active) {
+            display: none !important;
+        }
+
+        .juz-list-item {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .juz-list-item:hover {
+            background: var(--surface-hover);
         }
 
         /* Arabic Text */
@@ -1205,6 +1289,8 @@
             /* Using teal as base for shadow, JS could make this dynamic too */
         }
     </style>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
@@ -1246,6 +1332,11 @@
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#ramadanCalendarModal">
+                            <i class="fas fa-calendar-alt me-1"></i> Ramadan
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#bookmarksModal">
                             <i class="fas fa-bookmark"></i> Bookmarks
                         </a>
@@ -1275,6 +1366,16 @@
         </div>
     </nav>
 
+    <!-- Ramadan Countdown Banner -->
+    <div id="ramadanBanner" class="ramadan-banner" style="display: none;">
+        <div class="container d-flex justify-content-center align-items-center flex-wrap gap-2">
+            <div><i class="fas fa-moon me-2 text-warning"></i> Ramadan 2026 Countdown:</div>
+            <div id="countdownTimer" class="d-flex align-items-center">
+                <!-- Timer inserted by JS -->
+            </div>
+        </div>
+    </div>
+
     <!-- Mobile menu toggle button -->
     <button class="mobile-menu-toggle d-lg-none" id="mobileSidebarToggle">
         <i class="fas fa-list"></i>
@@ -1289,14 +1390,36 @@
             <!-- Sidebar / Surah List -->
             <div class="col-lg-3 p-0">
                 <div class="sidebar">
-                    <div class="sidebar-title">
-                        <i class="fas fa-list me-2"></i> Surah List
-                    </div>
-                    <div class="search-box">
-                        <input type="text" id="surahSearch" placeholder="Search surah...">
-                    </div>
-                    <div id="surahList">
-                        <!-- Surah list will be loaded here -->
+                    <!-- Sidebar Tabs -->
+                    <ul class="nav nav-pills nav-fill p-2 border-bottom" id="sidebarTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active btn-sm py-1" id="surah-tab" data-bs-toggle="tab"
+                                data-bs-target="#surahTabPane" type="button" role="tab">Surah</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link btn-sm py-1" id="juz-tab" data-bs-toggle="tab"
+                                data-bs-target="#juzTabPane" type="button" role="tab">Juz</button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content flex-grow-1 d-flex flex-column overflow-hidden" id="sidebarTabContent">
+                        <!-- Surah Tab -->
+                        <div class="tab-pane fade show active h-100 d-flex flex-column" id="surahTabPane"
+                            role="tabpanel">
+                            <div class="search-box">
+                                <input type="text" id="surahSearch" placeholder="Search surah...">
+                            </div>
+                            <div id="surahList" class="flex-grow-1 overflow-auto">
+                                <!-- Surah list loaded here -->
+                            </div>
+                        </div>
+
+                        <!-- Juz Tab -->
+                        <div class="tab-pane fade h-100 d-flex flex-column" id="juzTabPane" role="tabpanel">
+                            <div id="juzList" class="flex-grow-1 overflow-auto">
+                                <!-- Juz list loaded here -->
+                            </div>
+                        </div>
                     </div>
                     <!-- Sidebar Footer -->
                     <div class="sidebar-footer border-top p-3 bg-light small text-center">
@@ -1468,11 +1591,35 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <div id="bookmarksList">
-                        <div class="text-center text-muted py-4">
-                            <i class="fas fa-bookmark fa-2x mb-2"></i>
-                            <p>No bookmarks yet</p>
-                            <small>Click the heart icon on any verse to bookmark it</small>
+                    <!-- Tabs -->
+                    <ul class="nav nav-tabs mb-3" id="bookmarkTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="verses-tab" data-bs-toggle="tab"
+                                data-bs-target="#verses-pane" type="button" role="tab">Verses</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="hadiths-tab" data-bs-toggle="tab"
+                                data-bs-target="#hadiths-pane" type="button" role="tab">Hadiths</button>
+                        </li>
+                    </ul>
+                    <div class="tab-content" id="bookmarkTabsContent">
+                        <div class="tab-pane fade show active" id="verses-pane" role="tabpanel">
+                            <div id="bookmarksList">
+                                <div class="text-center text-muted py-4">
+                                    <i class="fas fa-bookmark fa-2x mb-2"></i>
+                                    <p>No verse bookmarks yet</p>
+                                    <small>Click the heart icon on any verse to bookmark it</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="hadiths-pane" role="tabpanel">
+                            <div id="hadithBookmarksList">
+                                <div class="text-center text-muted py-4">
+                                    <i class="fas fa-scroll fa-2x mb-2"></i>
+                                    <p>No hadith bookmarks yet</p>
+                                    <small>Click the heart icon on any hadith to save it</small>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1529,11 +1676,19 @@
                             </ul>
                         </div>
                         <div class="tutorial-section">
-                            <h6><i class="fas fa-mosque text-primary me-2"></i>Prayer Times</h6>
+                            <h6><i class="fas fa-mosque text-primary me-2"></i>Prayer Times & Ramadan</h6>
                             <ul>
-                                <li>Click "Prayer Times" in the menu</li>
+                                <li>Click "Prayer Times" in the menu for Salah schedule</li>
                                 <li>Set your city and country</li>
-                                <li>Prayer times will show in the navbar</li>
+                                <li><strong>Ramadan:</strong> Click "Ramadan" for calendar & Fazilat</li>
+                            </ul>
+                        </div>
+                        <div class="tutorial-section">
+                            <h6><i class="fas fa-book-open text-info me-2"></i>Tafsir & Hadith</h6>
+                            <ul>
+                                <li>Click <i class="fas fa-book-open"></i> on any verse for <strong>Tafsir</strong></li>
+                                <li>Access <strong>Hadith of the Day</strong> from the menu</li>
+                                <li>Toggle Languages (English/Bangla) and Bookmark Hadiths</li>
                             </ul>
                         </div>
                         <div class="tutorial-section">
@@ -1573,11 +1728,19 @@
                             </ul>
                         </div>
                         <div class="tutorial-section">
-                            <h6><i class="fas fa-mosque text-primary me-2"></i>নামাজের সময়</h6>
+                            <h6><i class="fas fa-mosque text-primary me-2"></i>নামাজের সময় ও রমজান</h6>
                             <ul>
                                 <li>মেনুতে "Prayer Times" এ ক্লিক করুন</li>
                                 <li>আপনার শহর ও দেশ সেট করুন</li>
-                                <li>নামাজের সময় নেভবারে দেখাবে</li>
+                                <li><strong>রমজান:</strong> ক্যালেন্ডার ও ফজিলতের জন্য "Ramadan" এ ক্লিক করুন</li>
+                            </ul>
+                        </div>
+                        <div class="tutorial-section">
+                            <h6><i class="fas fa-book-open text-info me-2"></i>তাফসির ও হাদিস</h6>
+                            <ul>
+                                <li>তাফসিরের জন্য যে কোনো আয়াতে <i class="fas fa-book-open"></i> ক্লিক করুন</li>
+                                <li>মেনু থেকে <strong>Hadith</strong> পড়ুন</li>
+                                <li>ভাষা পরিবর্তন ও হাদিস বুকমার্ক করার সুবিধা আছে</li>
                             </ul>
                         </div>
                     </div>
@@ -1823,6 +1986,86 @@
                 </div>
                 <div class="modal-footer border-0">
                     <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Done</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tafsir Modal -->
+    <div class="modal fade" id="tafsirModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content" style="background: var(--surface);">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title"><i class="fas fa-book-open me-2" style="color: var(--primary);"></i>Tafsir
+                        Ibn Kathir</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="tafsirContent">
+                        <!-- Content loaded via API -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hadith Modal -->
+    <div class="modal fade" id="hadithModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content" style="background: var(--surface);">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title"><i class="fas fa-scroll me-2 text-success"></i>Hadith of the Day</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="hadithContent" class="text-center">
+                        <div class="spinner-border text-success" role="status"></div>
+                        <p class="mt-2 text-muted">Loading authentic narration...</p>
+                    </div>
+                    <hr class="my-4 opacity-25">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-2 fw-bold">Daily Reading Goal</h6>
+                            <p class="small text-muted mb-0">Mark today's session as complete</p>
+                        </div>
+                        <button id="markHadithRead" class="btn btn-outline-success">
+                            <i class="far fa-check-circle me-1"></i> Mark as Done
+                        </button>
+                    </div>
+                    <div class="mt-4">
+                        <h6 class="mb-3 fw-bold">Your Progress (This Month)</h6>
+                        <canvas id="hadithChart" height="100"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ramadan Calendar Modal -->
+    <div class="modal fade" id="ramadanCalendarModal" tabindex="-1">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content" style="background: var(--surface);">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title"><i class="fas fa-moon me-2 text-warning"></i>Ramadan Calendar 2026</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0 text-center" style="min-width: 600px;">
+                            <thead class="bg-light sticky-top">
+                                <tr>
+                                    <th>Ramadan</th>
+                                    <th>Date</th>
+                                    <th>Sehri (Ends)</th>
+                                    <th>Iftar (Starts)</th>
+                                    <th class="w-50">Fazilat (Virtue)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ramadanCalendarBody">
+                                <!-- Generated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -2167,7 +2410,14 @@
 
                 // Initialize new features
                 // Initialize Settings
+                // Initialize new features
+                // Initialize Settings
                 initSettings();
+                initSettings();
+                initRamadanCountdown(); // Initialize Countdown
+                initJuzView();          // Initialize Juz Tabs
+                initHadithFeatures();   // Initialize Hadith
+                initRamadanCalendar();  // Initialize Calendar
 
                 // Wire up new feature event listeners
                 // Sleep Timer Dropdown Listener
@@ -3344,6 +3594,10 @@
                                     data-verse="${verseId}" title="Add Note">
                                 <i class="fas fa-sticky-note"></i>
                             </button>
+                            <button class="ayah-action-btn tafsir-btn" 
+                                    data-surah="${surahNumber}" data-ayah="${ayahNumber}" title="Read Tafsir">
+                                <i class="fas fa-book-open"></i>
+                            </button>
                             <button class="ayah-action-btn share-btn" 
                                     data-verse="${verseId}" 
                                     data-arabic="${encodeURIComponent(ayah.text)}"
@@ -3680,6 +3934,662 @@
                 $('#analyticsModal').on('show.bs.modal', function () {
                     updateAnalyticsPanels();
                 });
+            }
+
+            // ========================
+            // NEW FEATURES LOGIC
+            // ========================
+
+            function initRamadanCountdown() {
+                // Target: Feb 18, 2026 (Approximate)
+                const targetDate = new Date("February 18, 2026 00:00:00").getTime();
+                const banner = $('#ramadanBanner');
+                const timerDisplay = $('#countdownTimer');
+
+                function update() {
+                    const now = new Date().getTime();
+                    const distance = targetDate - now;
+
+                    if (distance < 0) {
+                        banner.html('<div class="container"><i class="fas fa-star text-warning me-2"></i> Ramadan Mubarak! <i class="fas fa-star text-warning ms-2"></i></div>');
+                        banner.show();
+                        return;
+                    }
+
+                    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                    timerDisplay.html(`
+                        <span class="countdown-item">${days}</span> <span class="countdown-label">Days</span>
+                        <span class="countdown-item">${hours}</span> <span class="countdown-label">Hrs</span>
+                        <span class="countdown-item">${minutes}</span> <span class="countdown-label">Mins</span>
+                        <span class="countdown-item">${seconds}</span> <span class="countdown-label">Secs</span>
+                    `);
+                    banner.show();
+                }
+
+                setInterval(update, 1000);
+                update();
+            }
+
+            function initJuzView() {
+                const juzListContainer = $('#juzList');
+                juzListContainer.empty();
+
+                for (let i = 1; i <= 30; i++) {
+                    const juzItem = $(`
+                        <div class="juz-list-item" data-juz="${i}">
+                            <div class="d-flex align-items-center">
+                                <span class="badge bg-light text-dark me-3" style="width:30px; height:30px; display:flex; align-items:center; justify-content:center; border-radius:50%; border:1px solid var(--border);">${i}</span>
+                                <div>
+                                    <div class="fw-semibold">Juz ${i}</div>
+                                    <small class="text-muted">Part ${i}</small>
+                                </div>
+                            </div>
+                            <i class="fas fa-chevron-right text-muted small"></i>
+                        </div>
+                    `);
+
+                    juzItem.on('click', function () {
+                        const juzId = $(this).data('juz');
+                        loadJuz(juzId);
+                        // Mobile toggle logic
+                        if ($(window).width() < 992) {
+                            toggleMobileSidebar(false);
+                        }
+                    });
+
+                    juzListContainer.append(juzItem);
+                }
+
+                // Fix: Ensure Bootstrap tabs properly toggle content visibility
+                $('button[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
+                    const targetId = $(e.target).attr('data-bs-target');
+
+                    // Hide all tab panes
+                    $('#sidebarTabContent .tab-pane').removeClass('show active');
+
+                    // Show the selected tab pane
+                    $(targetId).addClass('show active');
+                });
+            }
+
+            function loadJuz(juzId) {
+                // Show loading state
+                updateAppContent(`
+                    <div class="text-center py-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-3 text-muted">Loading Juz ${juzId}...</p>
+                    </div>
+                `);
+
+                // Fetch Juz Data (Arabic Uthmani)
+                // Note: Fetching full juz might be large.
+                $.get(`https://api.alquran.cloud/v1/juz/${juzId}/quran-uthmani`, function (response) {
+                    if (response.code === 200) {
+                        // We also need translation. For now, fetch Sahih International
+                        $.get(`https://api.alquran.cloud/v1/juz/${juzId}/en.sahih`, function (transResponse) {
+                            if (transResponse.code === 200) {
+                                renderJuzContent(juzId, response.data.ayahs, transResponse.data.ayahs);
+                            }
+                        });
+                    }
+                }).fail(function () {
+                    updateAppContent('<div class="alert alert-danger m-3">Failed to load Juz data. Please check connection.</div>');
+                });
+            }
+
+            function renderJuzContent(juzId, arabicAyahs, transAyahs) {
+                const container = $('#surahContent'); // Re-using surahContent container
+                container.empty();
+
+                // Header
+                container.append(`
+                    <div class="surah-info text-center mb-4">
+                        <h2 class="mb-2">Juz ${juzId}</h2>
+                        <div class="surah-meta justify-content-center">
+                            <span class="badge bg-primary-subtle text-primary rounded-pill px-3">
+                                <i class="fas fa-book-open me-1"></i> Part ${juzId}
+                            </span>
+                            <span class="badge bg-secondary-subtle text-secondary rounded-pill px-3">
+                                ${arabicAyahs.length} Verses
+                            </span>
+                        </div>
+                    </div>
+                `);
+
+                // Render Ayahs
+                arabicAyahs.forEach((ayah, index) => {
+                    const transAyah = transAyahs[index];
+                    const verseId = `${ayah.surah.number}:${ayah.numberInSurah}`; // Global Surah:Ayah
+
+                    // Check if new Surah starts here (Juz can span multiple Surahs)
+                    // But API returns valid 'surah' object in verse.
+                    // We could add a header if surah changes? 
+                    // Let's keep it simple: List verses.
+
+                    const el = $(`
+                        <div class="ayah-container" id="ayah-${verseId}" data-surah="${ayah.surah.number}" data-ayah="${ayah.numberInSurah}">
+                            <div class="ayah-actions">
+                                <div class="ayah-number">${ayah.surah.number}:${ayah.numberInSurah}</div>
+                                <div class="ayah-controls">
+                                    <button class="btn btn-sm btn-light btn-play" title="Play"><i class="fas fa-play"></i></button>
+                                    <button class="btn btn-sm btn-light btn-bookmark" title="Bookmark"><i class="far fa-heart"></i></button>
+                                    <button class="btn btn-sm btn-light btn-tafsir" title="Read Tafsir"><i class="fas fa-book-open"></i></button>
+                                </div>
+                            </div>
+                            <div class="arabic-text text-end mb-3 ${$('#showArabic').prop('checked') ? '' : 'd-none'}">
+                                ${ayah.text}
+                            </div>
+                            <div class="translation-text ${$('#showTranslation').prop('checked') ? '' : 'd-none'}">
+                                ${transAyah.text}
+                            </div>
+                        </div>
+                    `);
+
+                    // Attach events (Play, Bookmark) - simplified for Juz view
+                    // Note: Global audio player might need update to handle Juz playlist.
+                    // For now, playing single verse is safer.
+                    el.find('.btn-play').on('click', function () {
+                        // Play this verse audio
+                        if (state.audioElement.src !== ayah.audio) {
+                            state.audioElement.src = `https://cdn.islamic.network/quran/audio/128/ar.alafasy/${ayah.number}.mp3`; // Use global ID
+                            state.audioElement.play();
+                            state.isPlaying = true;
+                            $('#playPause i').removeClass('fa-play').addClass('fa-pause');
+                        } else {
+                            togglePlayPause();
+                        }
+                    });
+
+                    // Tafsir
+                    el.find('.btn-tafsir').on('click', function () {
+                        showTafsir(ayah.surah.number, ayah.numberInSurah);
+                    });
+
+                    container.append(el);
+                });
+
+                // Update main view
+                $('#homeWelcome').hide();
+                $('#surahContent').show();
+
+                // Update state
+                state.currentView = 'juz';
+                state.currentJuz = juzId;
+            }
+
+            // Function to update main content area
+            function updateAppContent(html) {
+                $('#homeWelcome').hide();
+                $('#surahContent').html(html).show();
+            }
+
+            function showTafsir(surah, ayah) {
+                const modal = new bootstrap.Modal(document.getElementById('tafsirModal'));
+                const content = $('#tafsirContent');
+
+                modal.show();
+                content.html(`
+                    <div class="text-center py-5">
+                        <div class="spinner-border text-primary" role="status"></div>
+                        <p class="mt-2 text-muted">Loading Tafsir...</p>
+                    </div>
+                `);
+
+                // Fetch English Tafsir (Ibn Kathir)
+                $.get(`https://api.alquran.cloud/v1/ayah/${surah}:${ayah}/editions/en.ibnkathir`, function (response) {
+                    if (response.code === 200) {
+                        const data = response.data[0];
+                        content.html(`
+                            <div class="mb-3 p-3 bg-light rounded border">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="badge bg-primary">Surah ${data.surah.englishName}</span>
+                                    <span class="badge bg-secondary">Verse ${data.numberInSurah}</span>
+                                </div>
+                                <p class="lead arabic-text text-end mb-3">${data.text}</p> <!-- API returns text in 'text' field which might be html -->
+                            </div>
+                            <div class="tafsir-text" style="line-height: 1.8;">
+                                ${data.text} 
+                            </div>
+                        `);
+                    }
+                }).fail(function () {
+                    content.html(`<div class="alert alert-danger">Tafsir not available for this verse or connection failed.</div>`);
+                });
+            }
+            $(document).on('click', '.tafsir-btn', function () {
+                const s = $(this).data('surah');
+                const a = $(this).data('ayah');
+                showTafsir(s, a);
+            });
+
+            function initHadithFeatures() {
+                // Add Hadith Button to Navbar if not present
+                if ($('#hadithNavBtn').length === 0) {
+                    const navItem = `
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#hadithModal" id="hadithNavBtn">
+                                <i class="fas fa-scroll"></i> Hadith
+                            </a>
+                        </li>
+                    `;
+                    $('.navbar-nav').prepend(navItem); // Add to start or end? Let's add start for visibility
+                }
+
+                // Load Hadith Content
+                $('#hadithModal').on('show.bs.modal', function () {
+                    loadDailyHadith();
+                    renderHadithChart();
+                });
+
+                // Mark as Read Logic
+                $('#markHadithRead').on('click', function () {
+                    const today = new Date().toISOString().split('T')[0];
+                    let progress = JSON.parse(localStorage.getItem('hadithProgress')) || {};
+
+                    if (progress[today]) {
+                        // Unmark
+                        delete progress[today];
+                        $(this).removeClass('btn-success').addClass('btn-outline-success').html('<i class="far fa-check-circle me-1"></i> Mark as Done');
+                    } else {
+                        // Mark
+                        progress[today] = true;
+                        $(this).removeClass('btn-outline-success').addClass('btn-success').html('<i class="fas fa-check-circle me-1"></i> Goal Achieved');
+
+                        // Celebration effect
+                        const btn = $(this);
+                        btn.addClass('animate__animated animate__rubberBand');
+                        setTimeout(() => btn.removeClass('animate__animated animate__rubberBand'), 1000);
+                    }
+
+                    localStorage.setItem('hadithProgress', JSON.stringify(progress));
+                    renderHadithChart(); // Refresh chart
+                });
+            }
+
+            function loadDailyHadith() {
+                // Check if already loaded today to avoid spamming API? 
+                // Creating a pseudo-random index based on date ensures everyone gets same hadith same day
+                const today = new Date();
+                const dayOfYear = Math.floor((today - new Date(today.getFullYear(), 0, 0)) / 1000 / 60 / 60 / 24);
+
+                // Bukhari has ~97 books/sections. Let's pick a section based on day (modulo).
+                // API: https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1/editions/eng-bukhari/sections/{section}.json
+                // Some sections are missing or empty. Let's stick to safe sections likely to exist (1-50).
+                const sectionId = (dayOfYear % 50) + 1;
+
+                const content = $('#hadithContent');
+
+                // Check local storage for today's status to update button
+                const todayStr = new Date().toISOString().split('T')[0];
+                const progress = JSON.parse(localStorage.getItem('hadithProgress')) || {};
+                const btn = $('#markHadithRead');
+                if (progress[todayStr]) {
+                    btn.removeClass('btn-outline-success').addClass('btn-success').html('<i class="fas fa-check-circle me-1"></i> Goal Achieved');
+                } else {
+                    btn.removeClass('btn-success').addClass('btn-outline-success').html('<i class="far fa-check-circle me-1"></i> Mark as Done');
+                }
+
+                $.get(`https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1/editions/eng-bukhari/sections/${sectionId}.json`, function (response) {
+                    // Response contains 'hadiths' array
+                    if (response.hadiths && response.hadiths.length > 0) {
+                        // Pick 1st hadith of the section for stability, or random? 
+                        // Let's pick based on day too to cycle through section.
+                        const hadithIndex = dayOfYear % response.hadiths.length;
+                        const hadith = response.hadiths[hadithIndex];
+
+                        content.html(`
+                            <div class="hadith-card text-start">
+                                <h5 class="fw-bold mb-3"><i class="fas fa-book me-2"></i>Sahih Al-Bukhari</h5>
+                                <div class="mb-2">
+                                    <span class="badge bg-light text-dark border">Book ${sectionId}</span>
+                                    <span class="badge bg-light text-dark border">Hadith ${hadith.hadithnumber}</span>
+                                </div>
+                                <p class="lead" style="font-size: 1.1rem; line-height: 1.8;">
+                                    "${hadith.text}"
+                                </p>
+                                <div class="text-end text-muted small mt-3">
+                                    Grade: <span class="badge bg-success">Authentic</span>
+                                </div>
+                            </div>
+                        `);
+                    } else {
+                        content.html('<p class="text-muted">Hadith data unavailable currently.</p>');
+                    }
+                }).fail(function () {
+                    content.html('<div class="alert alert-warning">Failed to load Hadith. Please check internet connection.</div>');
+                });
+            }
+
+            // ========================
+            // HADITH ENHANCEMENTS
+            // ========================
+            let hadithState = {
+                language: 'eng', // 'eng' or 'ben'
+                section: 1,
+                index: 0
+            };
+
+            function loadDailyHadith(next = false) {
+                const content = $('#hadithContent');
+                content.html(`
+                    <div class="text-center">
+                        <div class="spinner-border text-success" role="status"></div>
+                        <p class="mt-2 text-muted">Loading authentic narration...</p>
+                    </div>
+                `);
+
+                const today = new Date();
+                const dayOfYear = Math.floor((today - new Date(today.getFullYear(), 0, 0)) / 1000 / 60 / 60 / 24);
+
+                // If next requested, increment index
+                if (next) {
+                    hadithState.index++;
+                } else {
+                    hadithState.index = dayOfYear; // Default to day of year
+                }
+
+                // Determine edition based on language
+                const edition = hadithState.language === 'eng' ? 'eng-bukhari' : 'ben-bukhari';
+                // Section logic (simplified 1-20 for demo)
+                const sectionId = (hadithState.index % 20) + 1;
+
+                // Check saved bookmark
+                const savedHadiths = JSON.parse(localStorage.getItem('savedHadiths')) || [];
+                // We construct a unique ID: lang-section-number
+                // Actual API fetch
+                $.get(`https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1/editions/${edition}/sections/${sectionId}.json`, function (response) {
+                    if (response.hadiths && response.hadiths.length > 0) {
+                        const idx = hadithState.index % response.hadiths.length;
+                        const hadith = response.hadiths[idx];
+                        const hadithId = `${hadithState.language}-${sectionId}-${hadith.hadithnumber}`;
+                        const isSaved = savedHadiths.includes(hadithId);
+
+                        content.html(`
+                            <div class="hadith-card text-start">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h5 class="fw-bold mb-0"><i class="fas fa-book me-2"></i>Sahih Al-Bukhari</h5>
+                                    <div>
+                                        <button class="btn btn-sm btn-outline-secondary me-1" id="toggleHadithLang">
+                                            ${hadithState.language === 'eng' ? 'বাংলা' : 'English'}
+                                        </button>
+                                        <button class="btn btn-sm ${isSaved ? 'btn-danger' : 'btn-outline-danger'} bookmark-hadith-btn" 
+                                            data-id="${hadithId}">
+                                            <i class="${isSaved ? 'fas' : 'far'} fa-heart"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="badge bg-light text-dark border">Book ${sectionId}</span>
+                                    <span class="badge bg-light text-dark border">Hadith ${hadith.hadithnumber}</span>
+                                </div>
+                                <p class="lead" style="font-size: 1.1rem; line-height: 1.8;">
+                                    "${hadith.text}"
+                                </p>
+                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                    <span class="badge bg-success">Authentic</span>
+                                    <button class="btn btn-sm btn-primary" id="nextHadithBtn">
+                                        Read Next <i class="fas fa-arrow-right ms-1"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        `);
+
+                        // Bind events
+                        $('#toggleHadithLang').off('click').on('click', function () {
+                            hadithState.language = hadithState.language === 'eng' ? 'ben' : 'eng';
+                            loadDailyHadith();
+                        });
+
+                        $('#nextHadithBtn').off('click').on('click', function () {
+                            loadDailyHadith(true);
+                        });
+
+                        // Bookmark listener handled by global delegation
+
+                    } else {
+                        content.html('<div class="alert alert-info">Content unavailable for this section. <button class="btn btn-sm btn-link" id="nextHadithBtn">Try Next</button></div>');
+                        $('#nextHadithBtn').on('click', () => loadDailyHadith(true));
+                    }
+                }).fail(function () {
+                    content.html('<div class="alert alert-warning">Connection failed. Check internet.</div>');
+                });
+            }
+
+            // Global Delegation for Hadith Bookmarks
+            $(document).on('click', '.bookmark-hadith-btn', function () {
+                const id = $(this).data('id');
+                let saved = JSON.parse(localStorage.getItem('savedHadiths')) || [];
+
+                if (saved.includes(id)) {
+                    saved = saved.filter(x => x !== id);
+                    $(this).removeClass('btn-danger').addClass('btn-outline-danger').find('i').removeClass('fas').addClass('far');
+                } else {
+                    saved.push(id);
+                    $(this).removeClass('btn-outline-danger').addClass('btn-danger').find('i').removeClass('far').addClass('fas');
+                }
+                localStorage.setItem('savedHadiths', JSON.stringify(saved));
+                loadHadithBookmarks(); // Refresh list if open
+            });
+
+            // Function to load saved verses into Bookmarks modal
+            function loadBookmarks() {
+                const list = $('#bookmarksList');
+                const savedIds = JSON.parse(localStorage.getItem('savedVerses')) || [];
+
+                if (savedIds.length === 0) {
+                    list.html(`
+                        <div class="text-center text-muted py-4">
+                            <i class="fas fa-bookmark fa-2x mb-2"></i>
+                            <p>No verse bookmarks yet</p>
+                            <small>Click the heart icon on any verse to bookmark it</small>
+                        </div>
+                    `);
+                    return;
+                }
+
+                let html = '<ul class="list-group">';
+                savedIds.forEach(id => {
+                    const parts = id.split(':');
+                    html += `
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>Surah ${parts[0]}</strong>, Ayah ${parts[1]}
+                            </div>
+                            <div>
+                                <button class="btn btn-sm btn-primary go-to-verse" data-surah="${parts[0]}" data-ayah="${parts[1]}"><i class="fas fa-arrow-right"></i></button>
+                                <button class="btn btn-sm btn-outline-danger delete-saved-verse" data-id="${id}"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </li>
+                    `;
+                });
+                html += '</ul>';
+                list.html(html);
+
+                // Go to verse
+                $('.go-to-verse').on('click', function () {
+                    const surah = $(this).data('surah');
+                    const ayah = $(this).data('ayah');
+                    bootstrap.Modal.getInstance(document.getElementById('bookmarksModal')).hide();
+                    loadSurah(surah);
+                    // Scroll to specific ayah after load
+                    setTimeout(() => {
+                        const target = $(`#ayah-${surah}\\:${ayah}`);
+                        if (target.length) {
+                            $('html, body').animate({ scrollTop: target.offset().top - 100 }, 500);
+                            target.addClass('highlight-verse');
+                            setTimeout(() => target.removeClass('highlight-verse'), 2000);
+                        }
+                    }, 1500);
+                });
+
+                // Delete verse
+                $('.delete-saved-verse').on('click', function () {
+                    const id = $(this).data('id');
+                    let saved = JSON.parse(localStorage.getItem('savedVerses')) || [];
+                    saved = saved.filter(x => x !== id);
+                    localStorage.setItem('savedVerses', JSON.stringify(saved));
+                    loadBookmarks();
+                });
+            }
+
+            // Function to load saved hadiths into modal
+            function loadHadithBookmarks() {
+                const list = $('#hadithBookmarksList');
+                const savedIds = JSON.parse(localStorage.getItem('savedHadiths')) || [];
+
+                if (savedIds.length === 0) {
+                    list.html(`
+                        <div class="text-center text-muted py-4">
+                            <i class="fas fa-scroll fa-2x mb-2"></i>
+                            <p>No hadith bookmarks yet</p>
+                        </div>
+                    `);
+                    return;
+                }
+
+                // Listing Saved Hadiths
+                let html = '<ul class="list-group">';
+                savedIds.forEach(id => {
+                    const parts = id.split('-');
+                    const lang = parts[0] === 'eng' ? 'English' : 'Bengali';
+                    html += `
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>${lang}</strong> - Book ${parts[1]}, Hadith ${parts[2]}
+                            </div>
+                            <div>
+                                <button class="btn btn-sm btn-outline-danger delete-saved-hadith" data-id="${id}"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </li>
+                    `;
+                });
+                html += '</ul>';
+                list.html(html);
+
+                $('.delete-saved-hadith').on('click', function () {
+                    const id = $(this).data('id');
+                    let saved = JSON.parse(localStorage.getItem('savedHadiths')) || [];
+                    saved = saved.filter(x => x !== id);
+                    localStorage.setItem('savedHadiths', JSON.stringify(saved));
+                    loadHadithBookmarks();
+                });
+            }
+
+            // Hook up Bookmarks Modal Show event
+            $('#bookmarksModal').on('show.bs.modal', function () {
+                loadBookmarks(); // Verses
+                loadHadithBookmarks(); // Hadiths
+            });
+
+            function renderHadithChart() {
+                const ctx = document.getElementById('hadithChart');
+                if (!ctx) return;
+
+                const progress = JSON.parse(localStorage.getItem('hadithProgress')) || {};
+
+                // Get last 30 days
+                const labels = [];
+                const data = [];
+                const now = new Date();
+
+                for (let i = 29; i >= 0; i--) {
+                    const d = new Date();
+                    d.setDate(now.getDate() - i);
+                    const dateStr = d.toISOString().split('T')[0];
+                    labels.push(d.getDate()); // Just day number
+                    data.push(progress[dateStr] ? 1 : 0);
+                }
+
+                // Destroy existing chart if any (store instance in state?)
+                if (state.hadithChartInstance) {
+                    state.hadithChartInstance.destroy();
+                }
+
+                state.hadithChartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Daily Reading',
+                            data: data,
+                            backgroundColor: '#10b981',
+                            borderRadius: 4,
+                            barPercentage: 0.6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                display: false,
+                                max: 1.5
+                            },
+                            x: {
+                                grid: {
+                                    display: false
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        }
+                    }
+                });
+            }
+
+            function initRamadanCalendar() {
+                const calendarBody = $('#ramadanCalendarBody');
+                // Target: Feb 18, 2026
+                const startDate = new Date(2026, 1, 18); // Month is 0-indexed
+
+                // Fazilat placeholders (would require real database)
+                const fazilats = [
+                    { en: "The first 10 days are Mercy (Rahmat).", bn: "প্রথম ১০ দিন হলো রহমত।" },
+                    { en: "Fasting prescribes self-restraint.", bn: "রোজা আত্মসংযম শিক্ষা দেয়।" },
+                    { en: "Allah loves the smell of a fasting person's mouth.", bn: "রোজাদারের মুখের গন্ধ আল্লাহের কাছে কস্তুরীর চেয়েও প্রিয়।" },
+                    { en: "Recite Quran abundantly in this month.", bn: "এই মাসে বেশি বেশি কুরআন তিলাওয়াত করুন।" },
+                    { en: "Give charity without hesitation.", bn: "বিনা দ্বিধায় দান করুন।" },
+                    { en: "Pray Tahajjud for spiritual elevation.", bn: "আধ্যাত্মিক উন্নতির জন্য তাহাজ্জুদ পড়ুন।" },
+                    { en: "Seek forgiveness, for He is Forgiving.", bn: "ক্ষমা প্রার্থনা করুন, নিশ্চয়ই তিনি ক্ষমাশীল।" },
+                    { en: "Feed a fasting person to gain reward.", bn: "রোজাদারকে আহার করান, সওয়াব লাভ করুন।" },
+                    { en: "Control your anger and tongue.", bn: " রাগ এবং জিহ্বা নিয়ন্ত্রণ করুন।" },
+                    { en: "The second 10 days are Forgiveness (Maghfirat).", bn: "দ্বিতীয় ১০ দিন হলো মাগফিরাত (ক্ষমা)।" }
+                    // ... repeated or generated for 30 days
+                ];
+
+                calendarBody.empty();
+
+                for (let i = 0; i < 30; i++) {
+                    const date = new Date(startDate);
+                    date.setDate(startDate.getDate() + i);
+
+                    // Mock times (would depend on location, using generic averages or user location if available)
+                    // Let's use simple logic: Fajr - 15m, Maghrib + 0m
+                    const dayNum = i + 1;
+                    const fazilat = fazilats[i % fazilats.length];
+
+                    const row = `
+                        <tr>
+                            <td class="fw-bold">${dayNum}</td>
+                            <td>${date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}</td>
+                            <td>04:${40 - Math.floor(i / 2)} AM</td>
+                            <td>06:${10 + Math.floor(i / 2)} PM</td>
+                            <td class="text-start">
+                                <div class="fw-semibold text-primary">${fazilat.en}</div>
+                                <div class="small text-muted">${fazilat.bn}</div>
+                            </td>
+                        </tr>
+                    `;
+                    calendarBody.append(row);
+                }
             }
 
             // Initialize the application
